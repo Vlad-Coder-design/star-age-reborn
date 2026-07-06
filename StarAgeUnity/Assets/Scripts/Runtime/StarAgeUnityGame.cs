@@ -31,6 +31,16 @@ namespace StarAgeReborn.Unity
             { "improvedEngine", new EngineDef("Improved Engine", 1.25f, 1500) }
         };
 
+        readonly GalaxySystemDef[] galaxySystems =
+        {
+            new GalaxySystemDef("Aurora Gate", new Color(0.25f, 0.65f, 1f), "scientific", 1),
+            new GalaxySystemDef("Vega Reach", new Color(0.45f, 0.95f, 0.45f), "agrarian", 1),
+            new GalaxySystemDef("Cinder March", new Color(0.9f, 0.35f, 0.25f), "military", 2),
+            new GalaxySystemDef("Orion Foundry", new Color(0.25f, 0.9f, 0.55f), "industrial", 2),
+            new GalaxySystemDef("Nyx Frontier", new Color(0.75f, 0.45f, 1f), "mining", 3),
+            new GalaxySystemDef("Eclipse Crown", new Color(1f, 0.55f, 0.2f), "military", 3)
+        };
+
         Camera cam;
         ShipController playerShip;
         Canvas canvas;
@@ -40,7 +50,10 @@ namespace StarAgeReborn.Unity
         Text contextText;
         GameObject colonyPanel;
         GameObject shipyardPanel;
+        GameObject galaxyPanel;
+        GameObject tradingPanel;
 
+        readonly List<GameObject> worldObjects = new List<GameObject>();
         readonly List<PlanetView> planets = new List<PlanetView>();
         readonly List<ResourceObjectView> resourceObjects = new List<ResourceObjectView>();
         readonly List<ShipController> pirates = new List<ShipController>();
@@ -141,12 +154,16 @@ namespace StarAgeReborn.Unity
 
         void BuildWorld()
         {
+            ClearWorld();
             CreateStarfield();
 
-            string[] planetNames = { "Myth-Sec", "Astra-12", "Cinder-IV", "Nyx-Prime" };
+            int systemIndex = Mathf.Clamp(save.currentSystemIndex, 0, galaxySystems.Length - 1);
+            save.currentSystemIndex = systemIndex;
+            GalaxySystemDef system = galaxySystems[systemIndex];
+            string[] planetNames = PlanetNamesForSystem(systemIndex);
             Color[] colors =
             {
-                new Color(1f, 0.75f, 0.25f),
+                system.tint,
                 new Color(0.25f, 0.65f, 1f),
                 new Color(0.45f, 0.95f, 0.45f),
                 new Color(0.9f, 0.35f, 0.35f)
@@ -158,11 +175,13 @@ namespace StarAgeReborn.Unity
                 float angle = i / (float)planetNames.Length * Mathf.PI * 2f + 0.3f;
                 var planet = CreateCircle($"Planet {planetNames[i]}", new Vector3(Mathf.Cos(angle) * orbit, Mathf.Sin(angle) * orbit), 38f + i * 4f, colors[i]);
                 var view = planet.AddComponent<PlanetView>();
-                view.Init(this, $"planet-{i}", planetNames[i], i == 0 ? "scientific" : "mining");
+                string planetType = i == 0 ? system.primaryPlanetType : PlanetTypeForIndex(systemIndex, i);
+                view.Init(this, PlanetId(systemIndex, i), planetNames[i], planetType);
                 planets.Add(view);
             }
 
-            for (int i = 0; i < 18; i++)
+            int objectCount = 14 + system.dangerLevel * 4;
+            for (int i = 0; i < objectCount; i++)
             {
                 float orbit = Random.Range(230f, 650f);
                 float angle = Random.Range(0f, Mathf.PI * 2f);
@@ -171,7 +190,7 @@ namespace StarAgeReborn.Unity
 
             if (colonies.Count == 0)
             {
-                colonies.Add(new ColonyData("planet-0", "Myth-Sec", "scientific", true));
+                colonies.Add(new ColonyData(PlanetId(0, 0), "Myth-Sec", "scientific", true));
             }
         }
 
@@ -209,18 +228,27 @@ namespace StarAgeReborn.Unity
             MakeButton("Save", new Vector2(-110f, 34f), SaveGame);
             MakeButton("Shipyard", new Vector2(-110f, 76f), ToggleShipyard);
             MakeButton("Colony", new Vector2(-110f, 118f), OpenHomeColony);
+            MakeButton("Trade", new Vector2(-110f, 160f), ToggleTrading);
+            MakeButton("Galaxy Map", new Vector2(-110f, 202f), ToggleGalaxyMap);
 
             colonyPanel = MakePanel("Colony Panel", new Vector2(0f, 0f), new Vector2(520f, 310f));
             colonyPanel.SetActive(false);
 
             shipyardPanel = MakePanel("Shipyard Panel", new Vector2(0f, 0f), new Vector2(560f, 420f));
             shipyardPanel.SetActive(false);
+
+            tradingPanel = MakePanel("Trading Panel", new Vector2(0f, 0f), new Vector2(560f, 360f));
+            tradingPanel.SetActive(false);
+
+            galaxyPanel = MakePanel("Galaxy Panel", new Vector2(0f, 0f), new Vector2(640f, 460f));
+            galaxyPanel.SetActive(false);
         }
 
         void SyncUi()
         {
             if (creditsText == null) return;
 
+            save.currentSystemIndex = Mathf.Clamp(save.currentSystemIndex, 0, galaxySystems.Length - 1);
             var ship = shipClasses[save.shipClass];
             var weapon = weapons[save.weaponId];
             var engine = engines[save.engineId];
@@ -228,15 +256,27 @@ namespace StarAgeReborn.Unity
 
             creditsText.text = $"Credits: {save.credits:n0}";
             shipText.text =
-                $"{ship.label}\nHP: {playerShip.Hp}/{ship.hp}\nSpeed: {Mathf.RoundToInt(ship.speed * engine.speedMultiplier)} ({engine.speedMultiplier:0.##}x)\nWeapon: {weapon.label}\nDamage: {weapon.damage}  Range: {weapon.range}";
+                $"{galaxySystems[save.currentSystemIndex].name}\n{ship.label}\nHP: {playerShip.Hp}/{ship.hp}\nSpeed: {Mathf.RoundToInt(ship.speed * engine.speedMultiplier)} ({engine.speedMultiplier:0.##}x)\nWeapon: {weapon.label}\nDamage: {weapon.damage}  Range: {weapon.range}";
             cargoText.text = $"Cargo: {cargoUsed}/{ship.cargo}\nStone: {save.cargo.stone}  Ice: {save.cargo.ice}\nUranium: {save.cargo.uranium}  Fuel: {save.cargo.fuel}";
-            contextText.text = "Click space to move. Click asteroids to mine. Click pirates to attack.";
+            contextText.text = "Click space to move. Mine asteroids/comets. Fight pirates. Use Galaxy Map to travel.";
         }
 
         void ToggleShipyard()
         {
             shipyardPanel.SetActive(!shipyardPanel.activeSelf);
             if (shipyardPanel.activeSelf) RenderShipyard();
+        }
+
+        void ToggleTrading()
+        {
+            tradingPanel.SetActive(!tradingPanel.activeSelf);
+            if (tradingPanel.activeSelf) RenderTrading();
+        }
+
+        void ToggleGalaxyMap()
+        {
+            galaxyPanel.SetActive(!galaxyPanel.activeSelf);
+            if (galaxyPanel.activeSelf) RenderGalaxyMap();
         }
 
         void RenderShipyard()
@@ -257,6 +297,76 @@ namespace StarAgeReborn.Unity
             MakePanelButton(shipyardPanel, $"Improved Laser - {weapons["improvedLaser"].cost:n0}", new Vector2(0f, y - 12), () => PurchaseEquipment("weapon", "improvedLaser"));
             MakePanelButton(shipyardPanel, $"Improved Engine - {engines["improvedEngine"].cost:n0}", new Vector2(0f, y - 60), () => PurchaseEquipment("engine", "improvedEngine"));
             MakePanelButton(shipyardPanel, "Close", new Vector2(0f, -180f), () => shipyardPanel.SetActive(false));
+        }
+
+        void RenderTrading()
+        {
+            ClearChildren(tradingPanel.transform);
+            AddPanelTitle(tradingPanel, "Trading Post");
+
+            int cargoUsed = save.cargo.stone + save.cargo.ice + save.cargo.uranium + save.cargo.fuel;
+            AddPanelText(
+                tradingPanel,
+                $"Sell cargo for credits\nCargo: {cargoUsed}/{shipClasses[save.shipClass].cargo}\nStone: {save.cargo.stone} x3\nIce: {save.cargo.ice} x2\nUranium: {save.cargo.uranium} x5\nFuel: {save.cargo.fuel} x20",
+                new Vector2(-145f, -70f));
+
+            MakePanelButton(tradingPanel, "Sell All Cargo", new Vector2(130f, -42f), () =>
+            {
+                SellCargo();
+                RenderTrading();
+            });
+            MakePanelButton(tradingPanel, "Close", new Vector2(130f, -92f), () => tradingPanel.SetActive(false));
+        }
+
+        void RenderGalaxyMap()
+        {
+            ClearChildren(galaxyPanel.transform);
+            AddPanelTitle(galaxyPanel, "Galaxy Map");
+            AddPanelText(galaxyPanel, "Travel is instant in this prototype.\nHigher danger systems spawn more resources and pirates.", new Vector2(-170f, 135f));
+
+            for (int i = 0; i < galaxySystems.Length; i++)
+            {
+                int systemIndex = i;
+                GalaxySystemDef system = galaxySystems[i];
+                int row = i / 2;
+                int col = i % 2;
+                string status = i == save.currentSystemIndex ? "Current" : $"Danger {system.dangerLevel}";
+                string label = $"{system.name} - {status}";
+                MakePanelButton(galaxyPanel, label, new Vector2(-150f + col * 300f, 70f - row * 58f), () => TravelToSystem(systemIndex));
+            }
+
+            MakePanelButton(galaxyPanel, "Close", new Vector2(0f, -185f), () => galaxyPanel.SetActive(false));
+        }
+
+        void SellCargo()
+        {
+            int value = save.cargo.stone * 3 + save.cargo.ice * 2 + save.cargo.uranium * 5 + save.cargo.fuel * 20;
+            if (value <= 0) return;
+
+            save.credits += value;
+            save.cargo = new ResourceStore();
+            SyncUi();
+            SaveGame();
+        }
+
+        void TravelToSystem(int systemIndex)
+        {
+            if (systemIndex == save.currentSystemIndex) return;
+            if (systemIndex < 0 || systemIndex >= galaxySystems.Length) return;
+
+            save.currentSystemIndex = systemIndex;
+            BuildWorld();
+            if (playerShip != null)
+            {
+                playerShip.Target = null;
+                playerShip.transform.position = new Vector3(0f, -150f, 0f);
+                playerShip.SetDestination(playerShip.transform.position);
+            }
+
+            pirateSpawnTimer = 0f;
+            galaxyPanel.SetActive(false);
+            SyncUi();
+            SaveGame();
         }
 
         void OpenColony(ColonyData colony)
@@ -303,7 +413,7 @@ namespace StarAgeReborn.Unity
         {
             if (colonies.Count == 0)
             {
-                colonies.Add(new ColonyData("planet-0", "Myth-Sec", "scientific", true));
+                colonies.Add(new ColonyData(PlanetId(0, 0), "Myth-Sec", "scientific", true));
             }
 
             OpenColony(colonies[0]);
@@ -394,7 +504,10 @@ namespace StarAgeReborn.Unity
         void UpdatePirates()
         {
             pirateSpawnTimer += Time.deltaTime;
-            if (pirateSpawnTimer >= 18f && pirates.Count < 3)
+            int danger = galaxySystems[Mathf.Clamp(save.currentSystemIndex, 0, galaxySystems.Length - 1)].dangerLevel;
+            float spawnDelay = Mathf.Max(8f, 22f - danger * 4f);
+            int maxPirates = 2 + danger;
+            if (pirateSpawnTimer >= spawnDelay && pirates.Count < maxPirates)
             {
                 pirateSpawnTimer = 0f;
                 SpawnPirate();
@@ -484,6 +597,7 @@ namespace StarAgeReborn.Unity
         GameObject CreateCircle(string name, Vector3 position, float scale, Color color)
         {
             var obj = new GameObject(name);
+            worldObjects.Add(obj);
             obj.transform.position = position;
             obj.transform.localScale = Vector3.one * scale;
             var renderer = obj.AddComponent<SpriteRenderer>();
@@ -501,6 +615,56 @@ namespace StarAgeReborn.Unity
                 var star = CreateCircle("Star", new Vector3(Random.Range(-900f, 900f), Random.Range(-650f, 650f), 1f), Random.Range(1f, 3f), Color.white);
                 star.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, Random.Range(0.25f, 0.85f));
             }
+        }
+
+        void ClearWorld()
+        {
+            foreach (var projectile in projectiles)
+            {
+                if (projectile != null) Destroy(projectile.gameObject);
+            }
+
+            foreach (var pirate in pirates)
+            {
+                if (pirate != null) Destroy(pirate.gameObject);
+            }
+
+            foreach (var obj in worldObjects)
+            {
+                if (obj != null) Destroy(obj);
+            }
+
+            projectiles.Clear();
+            pirates.Clear();
+            resourceObjects.Clear();
+            planets.Clear();
+            worldObjects.Clear();
+        }
+
+        string PlanetId(int systemIndex, int planetIndex)
+        {
+            return systemIndex == 0 ? $"planet-{planetIndex}" : $"system-{systemIndex}-planet-{planetIndex}";
+        }
+
+        string[] PlanetNamesForSystem(int systemIndex)
+        {
+            string[][] names =
+            {
+                new[] { "Myth-Sec", "Astra-12", "Cinder-IV", "Nyx-Prime" },
+                new[] { "Vega Bloom", "Helio-Farm", "Blue Eden", "Pax Minor" },
+                new[] { "Cinder Bastion", "Vulcan Reach", "Red Anvil", "Ash-9" },
+                new[] { "Orion Mill", "Kappa Works", "Green Forge", "Delta Yard" },
+                new[] { "Nyx Quarry", "Opal Drift", "Deep Ring", "Stonefall" },
+                new[] { "Eclipse Prime", "Dread Halo", "Last Beacon", "Warspine" }
+            };
+
+            return names[Mathf.Clamp(systemIndex, 0, names.Length - 1)];
+        }
+
+        string PlanetTypeForIndex(int systemIndex, int planetIndex)
+        {
+            string[] cycle = { "mining", "agrarian", "military", "industrial", "scientific" };
+            return cycle[Mathf.Abs(systemIndex + planetIndex) % cycle.Length];
         }
 
         void BuildSprites()
@@ -611,7 +775,8 @@ namespace StarAgeReborn.Unity
 
         void AddPanelTitle(GameObject panel, string title)
         {
-            var text = AddPanelText(panel, title, new Vector2(0f, 126f));
+            float y = panel.GetComponent<RectTransform>().sizeDelta.y * 0.5f - 36f;
+            var text = AddPanelText(panel, title, new Vector2(0f, y));
             text.fontSize = 24;
             text.alignment = TextAnchor.MiddleCenter;
         }
@@ -883,6 +1048,7 @@ namespace StarAgeReborn.Unity
         public string weaponId = "basicLaser";
         public string engineId = "basicEngine";
         public int hp = 100;
+        public int currentSystemIndex;
         public ResourceStore cargo = new ResourceStore();
         public List<ColonyData> colonies = new List<ColonyData>();
 
@@ -891,6 +1057,7 @@ namespace StarAgeReborn.Unity
             if (string.IsNullOrEmpty(shipClass)) shipClass = "scout";
             if (string.IsNullOrEmpty(weaponId)) weaponId = "basicLaser";
             if (string.IsNullOrEmpty(engineId)) engineId = "basicEngine";
+            if (currentSystemIndex < 0) currentSystemIndex = 0;
             if (cargo == null) cargo = new ResourceStore();
             if (colonies == null) colonies = new List<ColonyData>();
             colonies.RemoveAll(c => c == null);
@@ -999,6 +1166,22 @@ namespace StarAgeReborn.Unity
             this.label = label;
             this.speedMultiplier = speedMultiplier;
             this.cost = cost;
+        }
+    }
+
+    public readonly struct GalaxySystemDef
+    {
+        public readonly string name;
+        public readonly Color tint;
+        public readonly string primaryPlanetType;
+        public readonly int dangerLevel;
+
+        public GalaxySystemDef(string name, Color tint, string primaryPlanetType, int dangerLevel)
+        {
+            this.name = name;
+            this.tint = tint;
+            this.primaryPlanetType = primaryPlanetType;
+            this.dangerLevel = dangerLevel;
         }
     }
 }
