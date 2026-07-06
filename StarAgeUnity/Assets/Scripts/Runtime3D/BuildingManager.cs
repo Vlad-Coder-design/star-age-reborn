@@ -98,10 +98,10 @@ namespace StarAge3D
                 var crack = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 crack.name = "Lava Crack";
                 crack.transform.SetParent(root.transform);
-                Vector2 p = RandomDisc(7.35f);
+                Vector2 p = RandomDisc(6.65f);
                 crack.transform.position = new Vector3(p.x, 0.52f, p.y);
                 crack.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 180f), 0f);
-                crack.transform.localScale = new Vector3(Random.Range(0.05f, 0.13f), 0.025f, Random.Range(1.0f, 3.1f));
+                crack.transform.localScale = new Vector3(Random.Range(0.045f, 0.1f), 0.025f, Random.Range(0.65f, 1.75f));
                 crack.GetComponent<Renderer>().material = Mat(new Color(1f, 0.38f, 0.08f), true);
             }
 
@@ -110,7 +110,7 @@ namespace StarAge3D
                 var crater = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 crater.name = "Crater";
                 crater.transform.SetParent(root.transform);
-                Vector2 p = RandomDisc(7f);
+                Vector2 p = RandomDisc(6.55f);
                 crater.transform.position = new Vector3(p.x, 0.55f, p.y);
                 crater.transform.localScale = new Vector3(Random.Range(0.5f, 1.2f), 0.05f, Random.Range(0.5f, 1.2f));
                 crater.GetComponent<Renderer>().material = Mat(new Color(0.08f, 0.06f, 0.055f));

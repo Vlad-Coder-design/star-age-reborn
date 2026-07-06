@@ -106,10 +106,10 @@ namespace StarAge3D
             Buildings.SetActive(true);
             UI.ShowPlanetHud();
             MainCamera.orthographic = true;
-            MainCamera.orthographicSize = 7.2f;
+            MainCamera.orthographicSize = 7.9f;
             MainCamera.clearFlags = CameraClearFlags.SolidColor;
             MainCamera.backgroundColor = new Color(0.018f, 0.026f, 0.055f);
-            MainCamera.transform.position = new Vector3(0f, 13.5f, -7.5f);
+            MainCamera.transform.position = new Vector3(0f, 16f, -0.1f);
             MainCamera.transform.LookAt(new Vector3(0f, 0.55f, 0f));
         }
 
