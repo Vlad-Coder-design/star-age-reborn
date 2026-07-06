@@ -52,12 +52,13 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebGL.loader.js";
+      var buildVersion = "dc53acf";
+      var loaderUrl = buildUrl + "/WebGL.loader.js?v=" + buildVersion;
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/WebGL.data",
-        frameworkUrl: buildUrl + "/WebGL.framework.js",
-        codeUrl: buildUrl + "/WebGL.wasm",
+        dataUrl: buildUrl + "/WebGL.data?v=" + buildVersion,
+        frameworkUrl: buildUrl + "/WebGL.framework.js?v=" + buildVersion,
+        codeUrl: buildUrl + "/WebGL.wasm?v=" + buildVersion,
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "StarAgeUnity",
