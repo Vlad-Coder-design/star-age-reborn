@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { MutableRefObject } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { integrateFlight } from "../game/physics";
 import type { FlightState, Planet, StarSystem, Vector3Tuple } from "../game/types";
@@ -242,13 +242,10 @@ function PlayerShip({ onFlightChange }: { onFlightChange: (flight: FlightState) 
     const result = integrateFlight(state.current.position, state.current.velocity, state.current.destination, delta);
     state.current.position = result.position;
     state.current.velocity = result.velocity;
+    state.current.destination = result.destination;
 
     if (ship.current) {
       ship.current.position.set(...result.position);
-      const speed = Math.hypot(result.velocity[0], result.velocity[2]);
-      if (speed > 0.04) {
-        ship.current.rotation.y = Math.atan2(result.velocity[0], result.velocity[2]);
-      }
     }
 
     camera.position.x += (result.position[0] - camera.position.x) * 0.035;
@@ -264,14 +261,46 @@ function PlayerShip({ onFlightChange }: { onFlightChange: (flight: FlightState) 
   });
 
   return (
-    <group ref={ship} position={state.current.position}>
+    <group ref={ship} position={state.current.position} scale={0.82}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <coneGeometry args={[0.32, 0.9, 3]} />
-        <meshStandardMaterial color="#78d9ff" emissive="#0a5d86" emissiveIntensity={0.45} metalness={0.25} roughness={0.35} />
+        <cylinderGeometry args={[0.18, 0.28, 1.18, 28]} />
+        <meshStandardMaterial color="#c7d9e8" metalness={0.55} roughness={0.28} />
       </mesh>
-      <mesh position={[0, 0, -0.42]} scale={[0.16, 0.16, 0.28]}>
+      <mesh position={[0, 0, -0.74]} rotation={[-Math.PI / 2, 0, 0]}>
+        <coneGeometry args={[0.2, 0.42, 28]} />
+        <meshStandardMaterial color="#eef7ff" metalness={0.48} roughness={0.22} />
+      </mesh>
+      <mesh position={[0, 0.16, -0.22]} scale={[0.22, 0.1, 0.32]}>
+        <sphereGeometry args={[1, 24, 16]} />
+        <meshStandardMaterial color="#62c9ff" emissive="#0b4b72" emissiveIntensity={0.65} metalness={0.12} roughness={0.08} />
+      </mesh>
+      <mesh position={[-0.43, -0.03, 0.05]} rotation={[0, 0, -0.18]} scale={[0.58, 0.045, 0.2]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#8ca6ba" metalness={0.42} roughness={0.32} />
+      </mesh>
+      <mesh position={[0.43, -0.03, 0.05]} rotation={[0, 0, 0.18]} scale={[0.58, 0.045, 0.2]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#8ca6ba" metalness={0.42} roughness={0.32} />
+      </mesh>
+      <mesh position={[-0.18, -0.01, 0.65]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.09, 0.11, 0.24, 18]} />
+        <meshStandardMaterial color="#596b7a" metalness={0.7} roughness={0.24} />
+      </mesh>
+      <mesh position={[0.18, -0.01, 0.65]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.09, 0.11, 0.24, 18]} />
+        <meshStandardMaterial color="#596b7a" metalness={0.7} roughness={0.24} />
+      </mesh>
+      <mesh position={[-0.18, -0.01, 0.82]} scale={[0.08, 0.08, 0.18]}>
+        <sphereGeometry args={[1, 18, 18]} />
+        <meshBasicMaterial color="#ffb25b" transparent opacity={0.72} />
+      </mesh>
+      <mesh position={[0.18, -0.01, 0.82]} scale={[0.08, 0.08, 0.18]}>
         <sphereGeometry args={[1, 18, 18]} />
         <meshBasicMaterial color="#ffb25b" transparent opacity={0.75} />
+      </mesh>
+      <mesh position={[0, -0.06, 0.31]} scale={[0.16, 0.035, 0.22]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="#3d5367" metalness={0.38} roughness={0.4} />
       </mesh>
       <FlightTargetBridge state={state} />
     </group>
