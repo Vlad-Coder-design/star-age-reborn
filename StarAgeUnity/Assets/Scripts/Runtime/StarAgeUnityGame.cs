@@ -260,6 +260,12 @@ namespace StarAgeReborn.Unity
 
         void OpenColony(ColonyData colony)
         {
+            if (colony == null) return;
+            if (colonyPanel == null)
+            {
+                colonyPanel = MakePanel("Colony Panel", new Vector2(0f, 0f), new Vector2(520f, 310f));
+            }
+
             colonyPanel.SetActive(true);
             ClearChildren(colonyPanel.transform);
             AddPanelTitle(colonyPanel, $"{colony.planetName} Colony");
@@ -552,7 +558,7 @@ namespace StarAgeReborn.Unity
         {
             var text = new GameObject(name).AddComponent<Text>();
             text.transform.SetParent(canvas.transform, false);
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = UiFont();
             text.fontSize = size;
             text.color = new Color(0.82f, 0.9f, 1f);
             text.alignment = anchor;
@@ -598,7 +604,7 @@ namespace StarAgeReborn.Unity
         {
             var text = new GameObject("Text").AddComponent<Text>();
             text.transform.SetParent(panel.transform, false);
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = UiFont();
             text.fontSize = 17;
             text.color = Color.white;
             text.alignment = TextAnchor.MiddleLeft;
@@ -625,7 +631,7 @@ namespace StarAgeReborn.Unity
 
             var text = new GameObject("Label").AddComponent<Text>();
             text.transform.SetParent(root.transform, false);
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = UiFont();
             text.fontSize = 15;
             text.fontStyle = FontStyle.Bold;
             text.color = Color.white;
@@ -636,6 +642,11 @@ namespace StarAgeReborn.Unity
             text.rectTransform.offsetMax = Vector2.zero;
             text.text = label;
             return root;
+        }
+
+        Font UiFont()
+        {
+            return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         void ClearChildren(Transform parent)
