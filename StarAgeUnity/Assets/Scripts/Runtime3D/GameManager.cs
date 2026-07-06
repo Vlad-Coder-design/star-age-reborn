@@ -105,9 +105,11 @@ namespace StarAge3D
             Space.SetActive(false);
             Buildings.SetActive(true);
             UI.ShowPlanetHud();
+            MainCamera.orthographic = true;
+            MainCamera.orthographicSize = 7.2f;
             MainCamera.clearFlags = CameraClearFlags.SolidColor;
             MainCamera.backgroundColor = new Color(0.018f, 0.026f, 0.055f);
-            MainCamera.transform.position = new Vector3(0f, 12.5f, -12f);
+            MainCamera.transform.position = new Vector3(0f, 13.5f, -7.5f);
             MainCamera.transform.LookAt(new Vector3(0f, 0.55f, 0f));
         }
 
@@ -117,6 +119,7 @@ namespace StarAge3D
             Buildings.SetActive(false);
             Space.SetActive(true);
             UI.ShowSpaceHud();
+            MainCamera.orthographic = false;
         }
 
         void BuildCamera()
@@ -132,6 +135,7 @@ namespace StarAge3D
             MainCamera.nearClipPlane = 0.1f;
             MainCamera.farClipPlane = 1200f;
             MainCamera.fieldOfView = 55f;
+            MainCamera.orthographic = false;
         }
 
         void BuildLighting()
