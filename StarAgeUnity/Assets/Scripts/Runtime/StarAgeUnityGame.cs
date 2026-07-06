@@ -72,6 +72,7 @@ namespace StarAgeReborn.Unity
         {
             save = LoadSave();
             colonies.AddRange(save.colonies ?? new List<ColonyData>());
+            NormalizeColonies();
             BuildSprites();
             LoadArt();
             BuildCamera();
@@ -207,7 +208,7 @@ namespace StarAgeReborn.Unity
 
             MakeButton("Save", new Vector2(-110f, 34f), SaveGame);
             MakeButton("Shipyard", new Vector2(-110f, 76f), ToggleShipyard);
-            MakeButton("Colony", new Vector2(-110f, 118f), () => OpenColony(colonies[0]));
+            MakeButton("Colony", new Vector2(-110f, 118f), OpenHomeColony);
 
             colonyPanel = MakePanel("Colony Panel", new Vector2(0f, 0f), new Vector2(520f, 310f));
             colonyPanel.SetActive(false);
@@ -261,6 +262,8 @@ namespace StarAgeReborn.Unity
         void OpenColony(ColonyData colony)
         {
             if (colony == null) return;
+            colony.WithDefaults();
+
             if (colonyPanel == null)
             {
                 colonyPanel = MakePanel("Colony Panel", new Vector2(0f, 0f), new Vector2(520f, 310f));
@@ -294,6 +297,16 @@ namespace StarAgeReborn.Unity
             }
 
             OpenColony(colony);
+        }
+
+        void OpenHomeColony()
+        {
+            if (colonies.Count == 0)
+            {
+                colonies.Add(new ColonyData("planet-0", "Myth-Sec", "scientific", true));
+            }
+
+            OpenColony(colonies[0]);
         }
 
         void PurchaseShip(string shipId)
@@ -415,6 +428,9 @@ namespace StarAgeReborn.Unity
         {
             foreach (var colony in colonies)
             {
+                if (colony == null) continue;
+                colony.WithDefaults();
+
                 if (Time.realtimeSinceStartup - colony.lastProductionTime >= 10f)
                 {
                     colony.lastProductionTime = Time.realtimeSinceStartup;
@@ -672,6 +688,15 @@ namespace StarAgeReborn.Unity
             }
         }
 
+        void NormalizeColonies()
+        {
+            colonies.RemoveAll(c => c == null);
+            foreach (var colony in colonies)
+            {
+                colony.WithDefaults();
+            }
+        }
+
         void SaveGame()
         {
             save.hp = playerShip != null ? playerShip.Hp : save.hp;
@@ -868,6 +893,11 @@ namespace StarAgeReborn.Unity
             if (string.IsNullOrEmpty(engineId)) engineId = "basicEngine";
             if (cargo == null) cargo = new ResourceStore();
             if (colonies == null) colonies = new List<ColonyData>();
+            colonies.RemoveAll(c => c == null);
+            foreach (var colony in colonies)
+            {
+                colony.WithDefaults();
+            }
             return this;
         }
     }
@@ -896,6 +926,16 @@ namespace StarAgeReborn.Unity
                 storage.ice = 5;
             }
             lastProductionTime = Time.realtimeSinceStartup;
+        }
+
+        public ColonyData WithDefaults()
+        {
+            if (string.IsNullOrEmpty(planetId)) planetId = "planet-0";
+            if (string.IsNullOrEmpty(planetName)) planetName = "Myth-Sec";
+            if (string.IsNullOrEmpty(planetType)) planetType = "scientific";
+            if (storage == null) storage = new ResourceStore();
+            if (lastProductionTime <= 0f) lastProductionTime = Time.realtimeSinceStartup;
+            return this;
         }
     }
 
