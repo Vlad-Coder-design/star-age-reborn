@@ -1,6 +1,6 @@
 # Star Age Reborn
 
-A browser-based 2D space strategy MMO-style MVP inspired by the original Star Age.
+A browser-playable space strategy prototype inspired by the original Star Age.
 
 Play online:
 
@@ -8,47 +8,52 @@ Play online:
 https://vlad-coder-design.github.io/star-age-reborn/
 ```
 
-The game runs in the browser with HTML5 Canvas, vanilla JavaScript ES modules, and localStorage persistence. There is no backend, account system, React, TypeScript, or build step.
+The main browser version now uses React, TypeScript, Three.js, React Three Fiber, and WebGL. It includes a lightweight fallback screen for browsers that cannot create a WebGL context.
 
 ## Features
 
-- 2D space flight with click-to-move controls
+- WebGL space scene with React Three Fiber
+- Procedural planet shader textures
+- Custom atmosphere shader shells
+- Ship flight with acceleration, drag, and inertia
+- Responsive HUD for desktop and smaller screens
+- Fallback path for browsers without WebGL
 - Procedural galaxy with multiple star systems and planets
 - Galaxy map and hyperspace travel
-- Asteroids, comets, NPC miners, and pirates
-- Projectile combat with ship weapon stats
-- Cargo, colony storage, trading post, and shipyard
-- Colony building grid and offline resource production
-- Ship progression with Scout, Fighter, and Destroyer classes
-- Equipment progression with Basic/Improved Laser and Basic/Improved Engine
-- Local save/load persistence
+- Asteroid mining, cargo, trading, and starter economy loop
 
 ## Run Locally
 
-Because the source uses ES modules, serve the folder with a static web server:
+Install dependencies:
 
 ```bash
-python -m http.server 8080
+pnpm install
 ```
 
-Then open:
+Start the dev server:
 
-```text
-http://127.0.0.1:8080/
+```bash
+pnpm dev
+```
+
+Build the static site:
+
+```bash
+pnpm build
 ```
 
 ## Project Structure
 
 ```text
 index.html
+package.json
+vite.config.ts
 src/
-  config.js
-  main.js
-  game.js
-  entities/
-  systems/
-  ui/
-  utils/
+  App.tsx
+  main.tsx
+  components/
+  game/
+  styles.css
 assets/
 assets-provided/
 documentation/
@@ -61,7 +66,3 @@ StarAgeUnity/      # Unity 2D prototype
 The `StarAgeUnity/` folder contains a Unity 2D version of the same MVP. Open that folder in Unity Hub and press Play, or build a shareable version from Unity with `Star Age > Build > Windows x64` or `Star Age > Build > WebGL`.
 
 For Windows, zip and share the entire generated `StarAgeUnity/Builds/Windows/` folder, not just the `.exe`. For WebGL, upload the full `StarAgeUnity/Builds/WebGL/` folder to a static web host.
-
-## Persistence
-
-Progress is stored in browser localStorage under `starage_reborn_save`.
