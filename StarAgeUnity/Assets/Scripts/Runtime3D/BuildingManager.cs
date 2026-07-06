@@ -181,9 +181,7 @@ namespace StarAge3D
 
         Material Mat(Color color)
         {
-            var mat = new Material(Shader.Find("Standard"));
-            mat.color = color;
-            return mat;
+            return RuntimeMaterial.Create(color);
         }
     }
 }

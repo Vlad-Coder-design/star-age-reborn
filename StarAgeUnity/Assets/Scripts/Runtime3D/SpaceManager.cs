@@ -152,11 +152,17 @@ namespace StarAge3D
             var rootShip = new GameObject(name);
             rootShip.transform.localScale = pirate ? Vector3.one * 0.85f : Vector3.one;
 
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             body.transform.SetParent(rootShip.transform);
             body.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            body.transform.localScale = new Vector3(0.55f, 0.55f, 1.35f);
+            body.transform.localScale = new Vector3(0.5f, 1.25f, 0.5f);
             body.GetComponent<Renderer>().material = Mat(color);
+
+            var nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            nose.transform.SetParent(rootShip.transform);
+            nose.transform.localPosition = new Vector3(0f, 0f, 1.25f);
+            nose.transform.localScale = new Vector3(0.48f, 0.32f, 0.65f);
+            nose.GetComponent<Renderer>().material = Mat(color * 1.1f);
 
             var cockpit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             cockpit.transform.SetParent(rootShip.transform);
@@ -189,10 +195,7 @@ namespace StarAge3D
 
         Material Mat(Color color)
         {
-            var mat = new Material(Shader.Find("Standard"));
-            mat.color = color;
-            if (color.maxColorComponent > 0.9f) mat.SetColor("_EmissionColor", color * 0.25f);
-            return mat;
+            return RuntimeMaterial.Create(color, color.maxColorComponent > 0.9f);
         }
     }
 }
