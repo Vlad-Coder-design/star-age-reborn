@@ -6,6 +6,8 @@ namespace StarAgeReborn.Unity.Editor
 {
     public static class StarAgeSceneTools
     {
+        const string PlayScenePath = "Assets/StarAgePlayScene.unity";
+
         [MenuItem("Star Age/Create Play Scene")]
         public static void CreatePlayScene()
         {
@@ -17,7 +19,11 @@ namespace StarAgeReborn.Unity.Editor
             camera.backgroundColor = new Color(0.01f, 0.012f, 0.04f);
             cameraObject.tag = "MainCamera";
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
-            EditorSceneManager.SaveScene(scene, "Assets/StarAgePlayScene.unity");
+            EditorSceneManager.SaveScene(scene, PlayScenePath);
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(PlayScenePath, true)
+            };
         }
     }
 }

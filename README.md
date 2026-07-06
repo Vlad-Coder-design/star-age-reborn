@@ -52,7 +52,9 @@ StarAgeUnity/      # Unity 2D prototype
 
 ## Unity Prototype
 
-The `StarAgeUnity/` folder contains a Unity 2D version scaffold of the same MVP. Open that folder in Unity Hub and press Play in any scene; the runtime bootstrap creates the playable prototype automatically.
+The `StarAgeUnity/` folder contains a Unity 2D version of the same MVP. Open that folder in Unity Hub and press Play, or build a shareable version from Unity with `Star Age > Build > Windows x64` or `Star Age > Build > WebGL`.
+
+For Windows, zip and share the entire generated `StarAgeUnity/Builds/Windows/` folder, not just the `.exe`. For WebGL, upload the full `StarAgeUnity/Builds/WebGL/` folder to a static web host.
 
 ## Persistence
 

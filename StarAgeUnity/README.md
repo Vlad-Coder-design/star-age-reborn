@@ -26,8 +26,49 @@ It keeps the same core loop:
 
 The game bootstraps itself automatically through `StarAgeUnityGame`.
 
+## How To Share A Playable Build
+
+The project now includes `Assets/StarAgePlayScene.unity` in Build Settings, so it can be built like a normal Unity game.
+
+### Windows
+
+1. Open `StarAgeUnity` in Unity 6.
+2. Use `Star Age > Build > Windows x64`.
+3. Wait for Unity to create:
+
+   `StarAgeUnity/Builds/Windows/`
+
+4. Zip the whole `Windows` folder.
+5. Send the zip to another Windows user.
+6. They unzip it and run:
+
+   `StarAgeReborn.exe`
+
+Do not send only the `.exe`; Unity builds need the generated data folders beside it.
+
+### WebGL
+
+1. Install Unity's WebGL Build Support module if Unity asks for it.
+2. Use `Star Age > Build > WebGL`.
+3. Upload everything in:
+
+   `StarAgeUnity/Builds/WebGL/`
+
+   to a static host such as GitHub Pages, itch.io, Netlify, or any web server.
+
+WebGL builds normally must be served from a web server. Opening `index.html` directly from disk may fail in browsers.
+
+### Manual Build Menu
+
+You can also use Unity's regular menu:
+
+1. Open `File > Build Profiles`.
+2. Select Windows or WebGL.
+3. Make sure `Assets/StarAgePlayScene.unity` is in the scene list.
+4. Click `Build`.
+
 ## Notes
 
-- Unity was not installed in this Codex environment, so this project was scaffolded by files and could not be played inside the Unity Editor here.
+- Unity batchmode validation in Codex may require an activated Unity license, but the project is set up for normal Unity Editor builds.
 - The browser version remains in the repository root.
 - The Unity version uses procedural fallback sprites if imported image assets are unavailable.
