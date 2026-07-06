@@ -56,6 +56,7 @@ namespace StarAge3D
         void Start()
         {
             EnsureEventSystem();
+            BuildLighting();
             Save.Load();
             Resources.Init(Save.Data.resources);
             Inventory.Init(300);
@@ -105,9 +106,9 @@ namespace StarAge3D
             Buildings.SetActive(true);
             UI.ShowPlanetHud();
             MainCamera.clearFlags = CameraClearFlags.SolidColor;
-            MainCamera.backgroundColor = new Color(0.35f, 0.15f, 0.08f);
-            MainCamera.transform.position = new Vector3(0f, 18f, -18f);
-            MainCamera.transform.rotation = Quaternion.Euler(55f, 0f, 0f);
+            MainCamera.backgroundColor = new Color(0.015f, 0.018f, 0.035f);
+            MainCamera.transform.position = new Vector3(0f, 15.5f, -15.5f);
+            MainCamera.transform.rotation = Quaternion.Euler(58f, 0f, 0f);
         }
 
         public void EnterSpaceMode()
@@ -131,6 +132,26 @@ namespace StarAge3D
             MainCamera.nearClipPlane = 0.1f;
             MainCamera.farClipPlane = 1200f;
             MainCamera.fieldOfView = 55f;
+        }
+
+        void BuildLighting()
+        {
+            if (FindFirstObjectByType<Light>() != null) return;
+            RenderSettings.ambientLight = new Color(0.18f, 0.18f, 0.24f);
+            var keyObject = new GameObject("Star Key Light");
+            var key = keyObject.AddComponent<Light>();
+            key.type = LightType.Directional;
+            key.intensity = 1.35f;
+            key.color = new Color(1f, 0.86f, 0.68f);
+            keyObject.transform.rotation = Quaternion.Euler(45f, -35f, 0f);
+
+            var fillObject = new GameObject("Blue Fill Light");
+            var fill = fillObject.AddComponent<Light>();
+            fill.type = LightType.Point;
+            fill.intensity = 1.2f;
+            fill.range = 30f;
+            fill.color = new Color(0.28f, 0.48f, 1f);
+            fillObject.transform.position = new Vector3(-8f, 8f, -8f);
         }
 
         void EnsureEventSystem()

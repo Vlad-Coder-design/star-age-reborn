@@ -155,37 +155,49 @@ namespace StarAge3D
             var body = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             body.transform.SetParent(rootShip.transform);
             body.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            body.transform.localScale = new Vector3(0.5f, 1.25f, 0.5f);
+            body.transform.localScale = new Vector3(0.44f, 1.65f, 0.44f);
             body.GetComponent<Renderer>().material = Mat(color);
 
             var nose = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             nose.transform.SetParent(rootShip.transform);
-            nose.transform.localPosition = new Vector3(0f, 0f, 1.25f);
-            nose.transform.localScale = new Vector3(0.48f, 0.32f, 0.65f);
+            nose.transform.localPosition = new Vector3(0f, 0f, 1.65f);
+            nose.transform.localScale = new Vector3(0.4f, 0.28f, 0.8f);
             nose.GetComponent<Renderer>().material = Mat(color * 1.1f);
 
             var cockpit = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             cockpit.transform.SetParent(rootShip.transform);
-            cockpit.transform.localPosition = new Vector3(0f, 0.24f, 0.28f);
-            cockpit.transform.localScale = new Vector3(0.45f, 0.18f, 0.55f);
-            cockpit.GetComponent<Renderer>().material = Mat(new Color(0.45f, 0.9f, 1f));
+            cockpit.transform.localPosition = new Vector3(0f, 0.32f, 0.45f);
+            cockpit.transform.localScale = new Vector3(0.34f, 0.15f, 0.58f);
+            cockpit.GetComponent<Renderer>().material = Mat(new Color(0.35f, 0.85f, 1f));
 
             for (int side = -1; side <= 1; side += 2)
             {
                 var wing = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 wing.transform.SetParent(rootShip.transform);
-                wing.transform.localPosition = new Vector3(side * 0.75f, -0.05f, -0.1f);
-                wing.transform.localRotation = Quaternion.Euler(0f, 0f, side * 10f);
-                wing.transform.localScale = new Vector3(0.9f, 0.08f, 0.32f);
+                wing.transform.localPosition = new Vector3(side * 0.82f, -0.05f, -0.15f);
+                wing.transform.localRotation = Quaternion.Euler(0f, side * 12f, side * 8f);
+                wing.transform.localScale = new Vector3(1.15f, 0.08f, 0.42f);
                 wing.GetComponent<Renderer>().material = Mat(color * 0.8f);
 
                 var engine = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 engine.transform.SetParent(rootShip.transform);
-                engine.transform.localPosition = new Vector3(side * 0.28f, -0.05f, -0.95f);
+                engine.transform.localPosition = new Vector3(side * 0.32f, -0.06f, -1.35f);
                 engine.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-                engine.transform.localScale = new Vector3(0.16f, 0.22f, 0.16f);
+                engine.transform.localScale = new Vector3(0.15f, 0.32f, 0.15f);
                 engine.GetComponent<Renderer>().material = Mat(new Color(0.15f, 0.16f, 0.18f));
+
+                var flame = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                flame.transform.SetParent(rootShip.transform);
+                flame.transform.localPosition = new Vector3(side * 0.32f, -0.06f, -1.72f);
+                flame.transform.localScale = new Vector3(0.16f, 0.16f, 0.34f);
+                flame.GetComponent<Renderer>().material = RuntimeMaterial.Create(pirate ? new Color(1f, 0.16f, 0.08f) : new Color(0.1f, 0.65f, 1f), true);
             }
+
+            var tail = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            tail.transform.SetParent(rootShip.transform);
+            tail.transform.localPosition = new Vector3(0f, 0.42f, -1.1f);
+            tail.transform.localScale = new Vector3(0.12f, 0.65f, 0.36f);
+            tail.GetComponent<Renderer>().material = Mat(color * 0.7f);
 
             var collider = rootShip.AddComponent<SphereCollider>();
             collider.radius = 0.85f;

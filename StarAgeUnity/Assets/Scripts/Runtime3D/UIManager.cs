@@ -36,23 +36,28 @@ namespace StarAge3D
         {
             canvas = new GameObject("Star Age 3D UI").AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.gameObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            var scaler = canvas.gameObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1280f, 720f);
+            scaler.matchWidthOrHeight = 0.5f;
             canvas.gameObject.AddComponent<GraphicRaycaster>();
 
-            resourceText = MakeText("Resources", canvas.transform, new Vector2(18f, -18f), new Vector2(410f, 160f), TextAnchor.UpperLeft, 16);
-            statusText = MakeText("Status", canvas.transform, new Vector2(-18f, -18f), new Vector2(470f, 110f), TextAnchor.UpperRight, 15);
+            var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -16f), new Vector2(320f, 116f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -10f), new Vector2(292f, 96f), TextAnchor.UpperLeft, 14);
+            var statusPanel = MakePanel("Status HUD", new Vector2(-16f, -16f), new Vector2(360f, 92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -10f), new Vector2(332f, 72f), TextAnchor.UpperRight, 13);
 
-            planetPanel = MakePanel("Planet Controls", new Vector2(16f, 18f), new Vector2(690f, 48f), new Vector2(0f, 0f), new Vector2(0f, 0f));
-            MakeButton("Crafting", planetPanel.transform, new Vector2(62f, 0f), new Vector2(120f, 34f), ToggleCrafting);
-            MakeButton("Market", planetPanel.transform, new Vector2(190f, 0f), new Vector2(120f, 34f), ToggleMarket);
-            MakeButton("Quest Board", planetPanel.transform, new Vector2(332f, 0f), new Vector2(140f, 34f), ToggleQuests);
-            MakeButton("Shipyard", planetPanel.transform, new Vector2(478f, 0f), new Vector2(130f, 34f), ToggleShipyard);
-            MakeButton("Fly To Space", planetPanel.transform, new Vector2(610f, 0f), new Vector2(140f, 34f), GameManager.Instance.EnterSpaceMode);
+            planetPanel = MakePanel("Planet Controls", new Vector2(0f, 18f), new Vector2(760f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            MakeButton("Crafting", planetPanel.transform, new Vector2(-285f, 27f), new Vector2(128f, 34f), ToggleCrafting);
+            MakeButton("Market", planetPanel.transform, new Vector2(-145f, 27f), new Vector2(118f, 34f), ToggleMarket);
+            MakeButton("Quest Board", planetPanel.transform, new Vector2(0f, 27f), new Vector2(138f, 34f), ToggleQuests);
+            MakeButton("Shipyard", planetPanel.transform, new Vector2(145f, 27f), new Vector2(126f, 34f), ToggleShipyard);
+            MakeButton("Fly To Space", planetPanel.transform, new Vector2(292f, 27f), new Vector2(146f, 34f), GameManager.Instance.EnterSpaceMode);
 
-            spacePanel = MakePanel("Space Controls", new Vector2(16f, 18f), new Vector2(520f, 48f), new Vector2(0f, 0f), new Vector2(0f, 0f));
-            MakeButton("Return Planet", spacePanel.transform, new Vector2(76f, 0f), new Vector2(150f, 34f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Save", spacePanel.transform, new Vector2(200f, 0f), new Vector2(90f, 34f), GameManager.Instance.SaveGame);
-            spaceText = MakeText("Space HUD", canvas.transform, new Vector2(-18f, -138f), new Vector2(460f, 130f), TextAnchor.UpperRight, 15);
+            spacePanel = MakePanel("Space Controls", new Vector2(0f, 18f), new Vector2(360f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            MakeButton("Return Planet", spacePanel.transform, new Vector2(-68f, 27f), new Vector2(150f, 34f), GameManager.Instance.EnterPlanetMode);
+            MakeButton("Save", spacePanel.transform, new Vector2(92f, 27f), new Vector2(90f, 34f), GameManager.Instance.SaveGame);
+            spaceText = MakeText("Space HUD", canvas.transform, new Vector2(-16f, -118f), new Vector2(340f, 112f), TextAnchor.UpperRight, 13);
 
             detailPanel = MakePanel("Building Details", Vector2.zero, new Vector2(540f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             craftingPanel = MakePanel("Crafting", Vector2.zero, new Vector2(520f, 360f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
@@ -99,7 +104,7 @@ namespace StarAge3D
             StarAgeSaveData data = GameManager.Instance.Save.Data;
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
-            statusText.text = $"Mode: {GameManager.Instance.Mode}\nShip: {ship.label}  Weapon: {weapon.label}\nControls: WASD move, mouse aim, LMB shoot, Space booster, R repair";
+            statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD + mouse, LMB fire";
 
             if (spaceText != null && spaceText.gameObject.activeSelf)
             {
@@ -243,7 +248,7 @@ namespace StarAge3D
             var panel = new GameObject(name, typeof(Image));
             panel.transform.SetParent(canvas.transform, false);
             Image image = panel.GetComponent<Image>();
-            image.color = new Color(0.02f, 0.04f, 0.08f, 0.86f);
+            image.color = new Color(0.015f, 0.025f, 0.045f, 0.78f);
             RectTransform rect = panel.GetComponent<RectTransform>();
             rect.anchorMin = anchor;
             rect.anchorMax = anchor;
@@ -288,7 +293,7 @@ namespace StarAge3D
             var buttonObject = new GameObject(label, typeof(Image), typeof(Button));
             buttonObject.transform.SetParent(parent, false);
             Image image = buttonObject.GetComponent<Image>();
-            image.color = new Color(0.12f, 0.26f, 0.42f, 0.95f);
+            image.color = new Color(0.08f, 0.22f, 0.38f, 0.94f);
             RectTransform rect = buttonObject.GetComponent<RectTransform>();
             rect.anchoredPosition = position;
             rect.sizeDelta = size;
