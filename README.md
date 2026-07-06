@@ -2,6 +2,12 @@
 
 A browser-based 2D space strategy MMO-style MVP inspired by the original Star Age.
 
+Play online:
+
+```text
+https://vlad-coder-design.github.io/star-age-reborn/
+```
+
 The game runs in the browser with HTML5 Canvas, vanilla JavaScript ES modules, and localStorage persistence. There is no backend, account system, React, TypeScript, or build step.
 
 ## Features
