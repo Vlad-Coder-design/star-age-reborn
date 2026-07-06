@@ -62,7 +62,7 @@ namespace StarAgeReborn.Unity
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Bootstrap()
         {
-            if (FindObjectOfType<StarAgeUnityGame>() != null) return;
+            if (FindFirstObjectByType<StarAgeUnityGame>() != null) return;
             var root = new GameObject("Star Age Reborn Unity");
             root.AddComponent<StarAgeUnityGame>();
             DontDestroyOnLoad(root);
@@ -191,7 +191,7 @@ namespace StarAgeReborn.Unity
 
         void BuildUi()
         {
-            if (FindObjectOfType<EventSystem>() == null)
+            if (FindFirstObjectByType<EventSystem>() == null)
             {
                 new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
             }
