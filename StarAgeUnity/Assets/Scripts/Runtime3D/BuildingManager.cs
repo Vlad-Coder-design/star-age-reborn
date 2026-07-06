@@ -84,14 +84,14 @@ namespace StarAge3D
             surface.name = "Rocky Lava Planet Surface";
             surface.transform.SetParent(root.transform);
             surface.transform.localScale = new Vector3(9.8f, 0.42f, 9.8f);
-            surface.GetComponent<Renderer>().material = Mat(new Color(0.36f, 0.18f, 0.12f));
+            surface.GetComponent<Renderer>().material = Mat(new Color(0.46f, 0.22f, 0.14f));
 
             var rim = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             rim.name = "Dark Basalt Rim";
             rim.transform.SetParent(root.transform);
             rim.transform.position = new Vector3(0f, 0.36f, 0f);
             rim.transform.localScale = new Vector3(10.25f, 0.08f, 10.25f);
-            rim.GetComponent<Renderer>().material = Mat(new Color(0.09f, 0.08f, 0.1f));
+            rim.GetComponent<Renderer>().material = Mat(new Color(0.18f, 0.11f, 0.09f));
 
             for (int i = 0; i < 24; i++)
             {
@@ -101,7 +101,7 @@ namespace StarAge3D
                 crack.transform.position = new Vector3(Random.Range(-7.5f, 7.5f), 0.52f, Random.Range(-7.5f, 7.5f));
                 crack.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 180f), 0f);
                 crack.transform.localScale = new Vector3(Random.Range(0.05f, 0.13f), 0.025f, Random.Range(1.0f, 3.1f));
-                crack.GetComponent<Renderer>().material = Mat(new Color(1f, 0.28f, 0.06f), true);
+                crack.GetComponent<Renderer>().material = Mat(new Color(1f, 0.38f, 0.08f), true);
             }
 
             for (int i = 0; i < 10; i++)
@@ -138,7 +138,7 @@ namespace StarAge3D
                 baseObject.transform.SetParent(root.transform);
                 baseObject.transform.position = new Vector3(x * 3.25f, 0.78f, z * 3.25f);
                 baseObject.transform.localScale = new Vector3(0.92f, 0.1f, 0.92f);
-                baseObject.GetComponent<Renderer>().material = Mat(new Color(0.12f, 0.28f, 0.36f), true);
+                baseObject.GetComponent<Renderer>().material = Mat(new Color(0.08f, 0.38f, 0.52f), true);
                 var slot = baseObject.AddComponent<BuildingSlot>();
                 slot.Init(i);
                 Slots.Add(slot);
@@ -166,7 +166,7 @@ namespace StarAge3D
                 cube.transform.SetParent(go.transform);
                 cube.transform.localPosition = Vector3.up * 0.04f;
                 cube.transform.localScale = new Vector3(1.15f, 0.08f, 1.15f);
-                cube.GetComponent<Renderer>().material = Mat(new Color(0.05f, 0.11f, 0.15f));
+                cube.GetComponent<Renderer>().material = Mat(new Color(0.05f, 0.18f, 0.24f));
                 return go;
             }
 
