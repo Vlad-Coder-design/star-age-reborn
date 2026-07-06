@@ -47,7 +47,12 @@ assets/
 assets-provided/
 documentation/
 ui-references/
+StarAgeUnity/      # Unity 2D prototype
 ```
+
+## Unity Prototype
+
+The `StarAgeUnity/` folder contains a Unity 2D version scaffold of the same MVP. Open that folder in Unity Hub and press Play in any scene; the runtime bootstrap creates the playable prototype automatically.
 
 ## Persistence
 

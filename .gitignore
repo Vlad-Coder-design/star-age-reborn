@@ -5,3 +5,13 @@ Thumbs.db
 node_modules/
 .env
 .env.*
+
+# Unity generated folders
+StarAgeUnity/Library/
+StarAgeUnity/Temp/
+StarAgeUnity/Obj/
+StarAgeUnity/Build/
+StarAgeUnity/Builds/
+StarAgeUnity/Logs/
+StarAgeUnity/UserSettings/
+StarAgeUnity/MemoryCaptures/
