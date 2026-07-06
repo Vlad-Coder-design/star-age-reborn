@@ -1,17 +1,22 @@
-# Star Age Reborn - Unity Prototype
+# Star Age - Unity 3D Prototype
 
-This is a Unity 2D port/prototype of the browser Star Age Reborn MVP.
+This is a Unity 6 3D prototype of Star Age: a space strategy/survival MVP with colony building, resource production, crafting, trading, ship upgrades, quests, space flight, mining, and pirate combat.
 
-It keeps the same core loop:
+## Current MVP Loop
 
-- Click-to-move space flight
-- Generated star system with planets, asteroids, and comets
-- Colony panel with storage and production
-- Trading and cargo
-- Pirates and projectile combat
-- Shipyard progression for Scout, Fighter, Destroyer
-- Improved Laser and Improved Engine upgrades
+- Start on a rocky lava planet with 9 visible building slots
+- Build Stone Quarry, Uranium Mine, Ice Mine, factories, Warehouse, and Market
+- Collect produced resources from buildings
+- Craft metal, fuel, repair kits, and boosters
+- Sell goods in the Market / Auction
+- Accept and complete quests from the Quest Board
+- Buy Scout, Fighter, Destroyer, weapons, engine, cargo, and armor upgrades
+- Fly into space with a 3D ship
+- Mine asteroids/comets by shooting them
+- Fight pirate ships in real time
 - JSON save/load in `Application.persistentDataPath`
+
+Prototype timers are intentionally compressed to seconds so the loop can be tested quickly in the editor.
 
 ## How To Open
 
@@ -21,10 +26,27 @@ It keeps the same core loop:
    `StarAgeUnity`
 
 3. Let Unity import packages and assets.
-4. Open any empty scene or create a new 2D scene.
+4. Open any empty scene or `Assets/StarAgePlayScene.unity`.
 5. Press Play.
 
-The game bootstraps itself automatically through `StarAgeUnityGame`.
+The game bootstraps itself automatically through `StarAge3D.GameManager`.
+
+## Controls
+
+### Planet View
+
+- Click a building slot to open building details
+- Build or collect from the selected slot
+- Use the bottom buttons for Crafting, Market, Quest Board, Shipyard, Save, and Fly To Space
+
+### Space View
+
+- `WASD` moves the ship
+- Mouse rotates ship direction
+- Left mouse button shoots laser projectiles
+- `Space` uses a speed booster if available
+- `R` uses a repair kit if available
+- Return Planet switches back to colony view
 
 ## How To Share A Playable Build
 
@@ -71,4 +93,4 @@ You can also use Unity's regular menu:
 
 - Unity batchmode validation in Codex may require an activated Unity license, but the project is set up for normal Unity Editor builds.
 - The browser version remains in the repository root.
-- The Unity version uses procedural fallback sprites if imported image assets are unavailable.
+- The Unity version uses generated low-poly placeholder models, so it does not require imported art assets to run.

@@ -77,6 +77,8 @@ namespace StarAgeReborn.Unity
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Bootstrap()
         {
+            if (FindFirstObjectByType<StarAge3D.GameManager>() != null) return;
+            if (PlayerPrefs.GetInt("StarAgeUseLegacy2D", 0) == 0) return;
             if (FindFirstObjectByType<StarAgeUnityGame>() != null) return;
             var root = new GameObject("Star Age Reborn Unity");
             root.AddComponent<StarAgeUnityGame>();
