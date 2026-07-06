@@ -48,6 +48,8 @@ namespace StarAgeReborn.Unity
         Text shipText;
         Text cargoText;
         Text contextText;
+        GameObject hudPanel;
+        GameObject objectivePanel;
         GameObject colonyPanel;
         GameObject shipyardPanel;
         GameObject galaxyPanel;
@@ -148,6 +150,7 @@ namespace StarAgeReborn.Unity
 
             cam.orthographic = true;
             cam.orthographicSize = 260f;
+            cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.01f, 0.012f, 0.04f);
             cam.transform.position = new Vector3(0f, 0f, -10f);
         }
@@ -201,7 +204,7 @@ namespace StarAgeReborn.Unity
             player.transform.position = new Vector3(0f, -150f, 0f);
             var renderer = player.AddComponent<SpriteRenderer>();
             renderer.sprite = SpriteForShip(save.shipClass);
-            renderer.color = Color.white;
+            renderer.color = ColorForShip(save.shipClass);
             renderer.sortingOrder = 5;
             player.AddComponent<CircleCollider2D>().radius = 18f;
             playerShip = player.AddComponent<ShipController>();
@@ -220,10 +223,13 @@ namespace StarAgeReborn.Unity
             canvas.gameObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvas.gameObject.AddComponent<GraphicRaycaster>();
 
-            creditsText = MakeText("Credits", new Vector2(18f, -18f), TextAnchor.UpperLeft, 18);
-            shipText = MakeText("Ship", new Vector2(18f, -48f), TextAnchor.UpperLeft, 16);
-            cargoText = MakeText("Cargo", new Vector2(18f, -148f), TextAnchor.UpperLeft, 16);
-            contextText = MakeText("Context", new Vector2(-18f, -18f), TextAnchor.UpperRight, 16);
+            hudPanel = MakeHudPanel("HUD Panel", new Vector2(16f, -16f), new Vector2(360f, 245f), false);
+            objectivePanel = MakeHudPanel("Objective Panel", new Vector2(-16f, -16f), new Vector2(480f, 82f), true);
+
+            creditsText = MakeText("Credits", new Vector2(14f, -12f), TextAnchor.UpperLeft, 18, hudPanel.transform, new Vector2(330f, 30f));
+            shipText = MakeText("Ship", new Vector2(14f, -46f), TextAnchor.UpperLeft, 15, hudPanel.transform, new Vector2(330f, 125f));
+            cargoText = MakeText("Cargo", new Vector2(14f, -174f), TextAnchor.UpperLeft, 15, hudPanel.transform, new Vector2(330f, 60f));
+            contextText = MakeText("Context", new Vector2(-14f, -12f), TextAnchor.UpperRight, 16, objectivePanel.transform, new Vector2(450f, 62f));
 
             MakeButton("Save", new Vector2(-110f, 34f), SaveGame);
             MakeButton("Shipyard", new Vector2(-110f, 76f), ToggleShipyard);
@@ -432,6 +438,7 @@ namespace StarAgeReborn.Unity
             save.hp = def.hp;
             playerShip.ApplyLoadout(shipId, save.weaponId, save.engineId, def.hp);
             playerShip.GetComponent<SpriteRenderer>().sprite = SpriteForShip(shipId);
+            playerShip.GetComponent<SpriteRenderer>().color = ColorForShip(shipId);
             RenderShipyard();
             SyncUi();
             SaveGame();
@@ -691,10 +698,15 @@ namespace StarAgeReborn.Unity
 
         Sprite SpriteForShip(string shipId)
         {
-            if (shipId == "fighter" && fighterSprite != null) return fighterSprite;
-            if (shipId == "destroyer" && destroyerSprite != null) return destroyerSprite;
-            if (playerSprite != null) return playerSprite;
+            if (shipId == "destroyer") return squareSprite;
             return triangleSprite;
+        }
+
+        Color ColorForShip(string shipId)
+        {
+            if (shipId == "fighter") return new Color(0.35f, 0.85f, 1f);
+            if (shipId == "destroyer") return new Color(1f, 0.75f, 0.25f);
+            return new Color(0.85f, 1f, 1f);
         }
 
         Sprite MakeCircleSprite()
@@ -734,20 +746,33 @@ namespace StarAgeReborn.Unity
             return Sprite.Create(texture, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f), 64f);
         }
 
-        Text MakeText(string name, Vector2 anchoredPosition, TextAnchor anchor, int size)
+        Text MakeText(string name, Vector2 anchoredPosition, TextAnchor anchor, int size, Transform parent = null, Vector2? sizeDelta = null)
         {
             var text = new GameObject(name).AddComponent<Text>();
-            text.transform.SetParent(canvas.transform, false);
+            text.transform.SetParent(parent == null ? canvas.transform : parent, false);
             text.font = UiFont();
             text.fontSize = size;
-            text.color = new Color(0.82f, 0.9f, 1f);
+            text.color = new Color(0.88f, 0.95f, 1f);
             text.alignment = anchor;
             text.rectTransform.anchorMin = anchor.ToString().Contains("Right") ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
             text.rectTransform.anchorMax = text.rectTransform.anchorMin;
             text.rectTransform.pivot = anchor.ToString().Contains("Right") ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
             text.rectTransform.anchoredPosition = anchoredPosition;
-            text.rectTransform.sizeDelta = new Vector2(430f, 160f);
+            text.rectTransform.sizeDelta = sizeDelta ?? new Vector2(430f, 160f);
             return text;
+        }
+
+        GameObject MakeHudPanel(string name, Vector2 anchoredPosition, Vector2 size, bool rightAligned)
+        {
+            var panel = new GameObject(name).AddComponent<Image>();
+            panel.transform.SetParent(canvas.transform, false);
+            panel.color = new Color(0.015f, 0.035f, 0.075f, 0.82f);
+            panel.rectTransform.anchorMin = rightAligned ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
+            panel.rectTransform.anchorMax = panel.rectTransform.anchorMin;
+            panel.rectTransform.pivot = rightAligned ? new Vector2(1f, 1f) : new Vector2(0f, 1f);
+            panel.rectTransform.anchoredPosition = anchoredPosition;
+            panel.rectTransform.sizeDelta = size;
+            return panel.gameObject;
         }
 
         void MakeButton(string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
