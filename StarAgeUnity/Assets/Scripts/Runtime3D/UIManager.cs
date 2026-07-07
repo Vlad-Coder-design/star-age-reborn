@@ -56,8 +56,8 @@ namespace StarAge3D
             MakeStatBar(resourcePanel.transform, "Hull Bar", new Vector2(14f, -10f), new Color(0.23f, 0.9f, 0.38f), out hpBarFill, out hpBarText);
             MakeStatBar(resourcePanel.transform, "Cargo Bar", new Vector2(14f, -36f), new Color(1f, 0.62f, 0.16f), out cargoBarFill, out cargoBarText);
             resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -64f), new Vector2(302f, 20f), TextAnchor.UpperLeft, 11);
-            var statusPanel = MakePanel("Status HUD", new Vector2(-178f, -14f), new Vector2(390f, 48f), new Vector2(1f, 1f), new Vector2(1f, 1f));
-            statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -9f), new Vector2(362f, 32f), TextAnchor.UpperRight, 13);
+            var statusPanel = MakePanel("Status HUD", new Vector2(-16f, -14f), new Vector2(154f, 48f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            statusText = MakeText("Status", statusPanel.transform, new Vector2(-12f, -8f), new Vector2(130f, 34f), TextAnchor.UpperRight, 13);
             MakeMinimap();
 
             planetPanel = MakePanel("Planet Controls", new Vector2(0f, 18f), new Vector2(760f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
@@ -67,20 +67,19 @@ namespace StarAge3D
             MakeButton("Shipyard", planetPanel.transform, new Vector2(145f, 27f), new Vector2(126f, 34f), ToggleShipyard);
             MakeButton("Fly To Space", planetPanel.transform, new Vector2(292f, 27f), new Vector2(146f, 34f), GameManager.Instance.EnterSpaceMode);
 
-            spacePanel = MakePanel("Space Controls", new Vector2(0f, 12f), new Vector2(760f, 46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-            MakeButton("Return Planet", spacePanel.transform, new Vector2(-270f, 23f), new Vector2(150f, 30f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Galaxy", spacePanel.transform, new Vector2(-110f, 23f), new Vector2(120f, 30f), ToggleGalaxyMap);
-            MakeButton("Save", spacePanel.transform, new Vector2(24f, 23f), new Vector2(90f, 30f), GameManager.Instance.SaveGame);
-            MakeButton("Market", spacePanel.transform, new Vector2(144f, 23f), new Vector2(110f, 30f), ToggleMarket);
-            MakeButton("Quests", spacePanel.transform, new Vector2(270f, 23f), new Vector2(110f, 30f), ToggleQuests);
-            spaceStatsPanel = MakePanel("Space Status HUD", new Vector2(16f, -142f), new Vector2(320f, 106f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-            spaceText = MakeText("Space HUD", spaceStatsPanel.transform, new Vector2(14f, -10f), new Vector2(292f, 86f), TextAnchor.UpperLeft, 13);
+            spacePanel = MakePanel("Space Controls", new Vector2(0f, 18f), new Vector2(420f, 30f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            spaceText = MakeText("Space HUD", spacePanel.transform, new Vector2(0f, -6f), new Vector2(404f, 20f), TextAnchor.MiddleCenter, 11);
+            spaceText.text = "WASD / RMB to fly - LMB or Space fires - click asteroids or pirates";
+            spaceStatsPanel = MakePanel("Mission Tracker", new Vector2(16f, 52f), new Vector2(330f, 32f), new Vector2(0f, 0f), new Vector2(0f, 0f));
+            MakeText("Mission Toast", spaceStatsPanel.transform, new Vector2(12f, -8f), new Vector2(306f, 18f), TextAnchor.UpperLeft, 11)
+                .text = "While you were away your colonies produced resources";
 
             rightRailPanel = MakePanel("Space Right Rail", new Vector2(-14f, -34f), new Vector2(58f, 324f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
             MakeButton("Map", rightRailPanel.transform, new Vector2(0f, 116f), new Vector2(44f, 36f), ToggleGalaxyMap);
             MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 62f), new Vector2(44f, 36f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, 8f), new Vector2(44f, 36f), TryRepairShip);
-            MakeButton("Go", rightRailPanel.transform, new Vector2(0f, -46f), new Vector2(44f, 36f), TryBoostShip);
+            MakeButton("Bag", rightRailPanel.transform, new Vector2(0f, 8f), new Vector2(44f, 36f), ToggleMarket);
+            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, -46f), new Vector2(44f, 36f), TryRepairShip);
+            MakeButton("Go", rightRailPanel.transform, new Vector2(0f, -100f), new Vector2(44f, 36f), TryBoostShip);
 
             detailPanel = MakePanel("Building Details", Vector2.zero, new Vector2(540f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             craftingPanel = MakePanel("Crafting", Vector2.zero, new Vector2(520f, 360f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
@@ -134,18 +133,13 @@ namespace StarAge3D
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
             RefreshTopBars(data, ship);
-            statusText.text = $"{GameManager.Instance.Mode}   {ship.label}   {weapon.label}";
-            if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"Orion System   {ship.label}   {weapon.label}";
+            statusText.text = $"{wallet.coins:n0} credits\nColony";
+            if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"{wallet.coins:n0} credits\nFomen System";
             if (minimapPanel != null) minimapPanel.SetActive(GameManager.Instance.Mode == GameMode.Space);
             if (GameManager.Instance.Mode == GameMode.Space) DrawMinimap();
 
             if (spaceText != null && spaceText.gameObject.activeSelf)
-            {
-                ShipController player = GameManager.Instance.Space.PlayerShip;
-                int hp = player != null ? player.Hp : data.shipHp;
-                int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
-                spaceText.text = $"Ship: {ship.label}\nHP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nLMB/Space fire  RMB fly";
-            }
+                spaceText.text = "WASD / RMB to fly - LMB or Space fires - click asteroids or pirates";
         }
 
         void MakeMinimap()

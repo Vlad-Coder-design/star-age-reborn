@@ -67,7 +67,7 @@ namespace StarAge3D
             Buildings.Init();
             Space.Init();
             UI.Init();
-            EnterPlanetMode();
+            EnterSpaceMode();
         }
 
         void Update()
@@ -120,9 +120,9 @@ namespace StarAge3D
             Space.SetActive(true);
             UI.ShowSpaceHud();
             MainCamera.orthographic = false;
-            MainCamera.fieldOfView = 52f;
+            MainCamera.fieldOfView = 46f;
             MainCamera.clearFlags = CameraClearFlags.SolidColor;
-            MainCamera.backgroundColor = new Color(0.004f, 0.008f, 0.02f);
+            MainCamera.backgroundColor = new Color(0.001f, 0.004f, 0.014f);
         }
 
         void BuildCamera()

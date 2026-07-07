@@ -28,8 +28,8 @@ namespace StarAge3D
         {
             if (GameManager.Instance == null || GameManager.Instance.Mode != GameMode.Space || PlayerShip == null) return;
             Camera cam = GameManager.Instance.MainCamera;
-            Vector3 target = PlayerShip.transform.position + new Vector3(0f, 62f, 30f);
-            cam.transform.position = Vector3.Lerp(cam.transform.position, target, 0.08f);
+            Vector3 target = PlayerShip.transform.position + new Vector3(0f, 42f, 24f);
+            cam.transform.position = Vector3.Lerp(cam.transform.position, target, 0.12f);
             cam.transform.LookAt(PlayerShip.transform.position);
         }
 
@@ -116,6 +116,8 @@ namespace StarAge3D
             BuildStarfield();
             BuildSolarSystem();
             RebuildPlayerShip();
+            SpawnMiningObjectAt(new Vector3(-6f, 0f, 33f), true, 2.1f);
+            SpawnMiningObjectAt(new Vector3(11f, 0f, 29f), false, 1.5f);
             for (int i = 0; i < 30; i++) SpawnMiningObject(i < 20);
             for (int i = 0; i < 8; i++) SpawnPirate();
             for (int i = 0; i < 8; i++) SpawnNpcMiner();
@@ -234,6 +236,18 @@ namespace StarAge3D
                 Color tint = Random.value > 0.82f ? new Color(0.55f, 0.82f, 1f) : new Color(0.86f, 0.91f, 1f);
                 star.GetComponent<Renderer>().material = Mat(tint);
             }
+
+            for (int i = 0; i < 36; i++)
+            {
+                var haze = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                haze.name = "Soft Star Smear";
+                haze.transform.SetParent(root.transform);
+                haze.transform.position = new Vector3(Random.Range(-160f, 160f), Random.Range(10f, 64f), Random.Range(-160f, 160f));
+                float scale = Random.Range(0.35f, 0.9f);
+                haze.transform.localScale = new Vector3(scale * Random.Range(1.4f, 2.8f), 0.015f, scale);
+                haze.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 180f), 0f);
+                haze.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(0.58f, 0.8f, 1f, 0.34f), true);
+            }
         }
 
         void SpawnMiningObject(bool asteroid)
@@ -245,6 +259,20 @@ namespace StarAge3D
             float scale = Random.Range(0.9f, 1.8f);
             rock.transform.localScale = asteroid ? new Vector3(scale * 1.25f, scale * 0.82f, scale) : Vector3.one * scale;
             rock.GetComponent<Renderer>().material = Mat(asteroid ? new Color(0.42f, 0.38f, 0.34f) : new Color(0.45f, 0.9f, 1f));
+            rock.AddComponent<MiningObject>().Init(asteroid ? ResourceType.Stone : ResourceType.Ice);
+            spawned.Add(rock);
+            mapResources.Add(rock.transform);
+        }
+
+        void SpawnMiningObjectAt(Vector3 position, bool asteroid, float scale)
+        {
+            var rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            rock.name = asteroid ? "Featured Asteroid" : "Featured Comet";
+            rock.transform.SetParent(root.transform);
+            rock.transform.position = position;
+            rock.transform.localScale = asteroid ? new Vector3(scale * 1.25f, scale * 0.82f, scale) : Vector3.one * scale;
+            rock.transform.rotation = Quaternion.Euler(Random.Range(0f, 40f), Random.Range(0f, 360f), Random.Range(0f, 40f));
+            rock.GetComponent<Renderer>().material = Mat(asteroid ? new Color(0.48f, 0.52f, 0.58f) : new Color(0.45f, 0.9f, 1f));
             rock.AddComponent<MiningObject>().Init(asteroid ? ResourceType.Stone : ResourceType.Ice);
             spawned.Add(rock);
             mapResources.Add(rock.transform);
