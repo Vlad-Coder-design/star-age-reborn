@@ -95,7 +95,7 @@ namespace StarAge3D
 
             for (int i = 0; i < 9; i++)
             {
-                Vector2 p = RandomDisc(6.2f);
+                Vector2 p = RandomDisc(4.05f);
                 float size = Random.Range(0.7f, 1.45f);
                 AddPlanetDisc("Cooling Lava Edge", p, 0.532f, new Vector3(size * 1.35f, 0.015f, size * 0.82f), new Color(0.12f, 0.055f, 0.035f), false, Random.Range(0f, 180f));
                 AddPlanetDisc("Molten Lava Pool", p, 0.558f, new Vector3(size * 1.1f, 0.018f, size * 0.65f), new Color(1f, 0.24f, 0.04f), true, Random.Range(0f, 180f));
@@ -103,20 +103,20 @@ namespace StarAge3D
 
             for (int i = 0; i < 16; i++)
             {
-                Vector2 p = RandomDisc(6.65f);
+                Vector2 p = RandomDisc(4.45f);
                 float angle = Random.Range(0f, 180f);
                 AddPlanetBox("Branching Lava Fissure", p, 0.565f, new Vector3(Random.Range(0.05f, 0.11f), 0.025f, Random.Range(0.55f, 1.25f)), new Color(1f, 0.38f, 0.08f), true, angle);
 
                 if (Random.value > 0.35f)
                 {
-                    Vector2 branch = p + Random.insideUnitCircle * 0.35f;
+                    Vector2 branch = Vector2.ClampMagnitude(p + Random.insideUnitCircle * 0.35f, 4.55f);
                     AddPlanetBox("Small Lava Branch", branch, 0.57f, new Vector3(Random.Range(0.035f, 0.07f), 0.02f, Random.Range(0.28f, 0.65f)), new Color(1f, 0.52f, 0.11f), true, angle + Random.Range(35f, 70f));
                 }
             }
 
             for (int i = 0; i < 14; i++)
             {
-                Vector2 p = RandomDisc(6.55f);
+                Vector2 p = RandomDisc(4.35f);
                 float size = Random.Range(0.45f, 1.05f);
                 AddPlanetDisc("Raised Crater Rim", p, 0.565f, new Vector3(size * 1.28f, 0.035f, size * 1.05f), new Color(0.24f, 0.15f, 0.12f), false, Random.Range(0f, 180f));
                 AddPlanetDisc("Shadowed Crater Bowl", p, 0.59f, new Vector3(size, 0.022f, size * 0.78f), new Color(0.055f, 0.045f, 0.045f), false, Random.Range(0f, 180f));
@@ -124,20 +124,20 @@ namespace StarAge3D
 
             for (int i = 0; i < 26; i++)
             {
-                Vector2 p = RandomDisc(6.8f);
+                Vector2 p = RandomDisc(4.5f);
                 float size = Random.Range(0.16f, 0.42f);
                 AddRock("Basalt Boulder", p, new Vector3(size * Random.Range(1.0f, 1.7f), size * Random.Range(0.55f, 1.0f), size * Random.Range(0.8f, 1.35f)), new Color(0.1f, 0.085f, 0.08f), Random.Range(0f, 180f));
             }
 
             for (int i = 0; i < 18; i++)
             {
-                Vector2 p = RandomDisc(6.4f);
+                Vector2 p = RandomDisc(4.35f);
                 AddPlanetDisc("Rust Mineral Patch", p, 0.575f, new Vector3(Random.Range(0.28f, 0.62f), 0.018f, Random.Range(0.18f, 0.42f)), new Color(0.64f, 0.31f, 0.16f), false, Random.Range(0f, 180f));
             }
 
             for (int i = 0; i < 12; i++)
             {
-                Vector2 p = RandomDisc(6.2f);
+                Vector2 p = RandomDisc(4.25f);
                 float height = Random.Range(0.18f, 0.42f);
                 AddPlanetBox("Uranium Crystal", p, 0.74f, new Vector3(0.08f, height, 0.08f), new Color(0.35f, 1f, 0.42f), true, Random.Range(0f, 180f));
             }
