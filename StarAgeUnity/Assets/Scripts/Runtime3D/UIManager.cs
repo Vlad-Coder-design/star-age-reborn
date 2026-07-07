@@ -10,6 +10,10 @@ namespace StarAge3D
         Text resourceText;
         Text statusText;
         Text spaceText;
+        Text hpBarText;
+        Text cargoBarText;
+        RectTransform hpBarFill;
+        RectTransform cargoBarFill;
         GameObject minimapPanel;
         RawImage minimapImage;
         Texture2D minimapTexture;
@@ -48,8 +52,10 @@ namespace StarAge3D
             scaler.matchWidthOrHeight = 0.5f;
             canvas.gameObject.AddComponent<GraphicRaycaster>();
 
-            var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -14f), new Vector2(560f, 48f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-            resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -9f), new Vector2(532f, 32f), TextAnchor.UpperLeft, 14);
+            var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -14f), new Vector2(330f, 88f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            MakeStatBar(resourcePanel.transform, "Hull Bar", new Vector2(14f, -10f), new Color(0.23f, 0.9f, 0.38f), out hpBarFill, out hpBarText);
+            MakeStatBar(resourcePanel.transform, "Cargo Bar", new Vector2(14f, -36f), new Color(1f, 0.62f, 0.16f), out cargoBarFill, out cargoBarText);
+            resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -64f), new Vector2(302f, 20f), TextAnchor.UpperLeft, 11);
             var statusPanel = MakePanel("Status HUD", new Vector2(-178f, -14f), new Vector2(390f, 48f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -9f), new Vector2(362f, 32f), TextAnchor.UpperRight, 13);
             MakeMinimap();
@@ -123,10 +129,11 @@ namespace StarAge3D
         {
             if (resourceText == null || GameManager.Instance == null || GameManager.Instance.Resources == null) return;
             ResourceWallet wallet = GameManager.Instance.Resources.Wallet;
-            resourceText.text = $"HP/Cargo on ship   Stone {wallet.stone}   Uranium {wallet.uranium}   Ice {wallet.ice}   Metal {wallet.metal}   Fuel {wallet.fuel}   Coins {wallet.coins}";
+            resourceText.text = $"Stone {wallet.stone}   U {wallet.uranium}   Ice {wallet.ice}   Metal {wallet.metal}   Fuel {wallet.fuel}   Coins {wallet.coins}";
             StarAgeSaveData data = GameManager.Instance.Save.Data;
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
+            RefreshTopBars(data, ship);
             statusText.text = $"{GameManager.Instance.Mode}   {ship.label}   {weapon.label}";
             if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"Orion System   {ship.label}   {weapon.label}";
             if (minimapPanel != null) minimapPanel.SetActive(GameManager.Instance.Mode == GameMode.Space);
@@ -426,6 +433,26 @@ namespace StarAge3D
             if (galaxyPanel != null) galaxyPanel.SetActive(false);
         }
 
+        void RefreshTopBars(StarAgeSaveData data, ShipStats ship)
+        {
+            ShipController player = GameManager.Instance.Space.PlayerShip;
+            int hp = player != null ? player.Hp : data.shipHp;
+            int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
+            int cargo = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoUsed() : 0;
+            int cargoMax = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoCapacity() : ship.cargo + data.cargoModules * 20;
+            SetBar(hpBarFill, hp, maxHp, 216f);
+            SetBar(cargoBarFill, cargo, cargoMax, 216f);
+            if (hpBarText != null) hpBarText.text = $"{hp}/{maxHp}";
+            if (cargoBarText != null) cargoBarText.text = $"Cargo {cargo}/{cargoMax}";
+        }
+
+        void SetBar(RectTransform fill, int value, int max, float width)
+        {
+            if (fill == null) return;
+            float pct = max > 0 ? Mathf.Clamp01(value / (float)max) : 0f;
+            fill.sizeDelta = new Vector2(width * pct, fill.sizeDelta.y);
+        }
+
         GameObject MakePanel(string name, Vector2 position, Vector2 size, Vector2 anchor, Vector2 pivot)
         {
             var panel = new GameObject(name, typeof(Image));
@@ -485,6 +512,37 @@ namespace StarAge3D
 
             Text labelText = MakeText("Label", buttonObject.transform, Vector2.zero, size, TextAnchor.MiddleCenter, 14);
             labelText.text = label;
+            labelText.rectTransform.anchorMin = Vector2.zero;
+            labelText.rectTransform.anchorMax = Vector2.one;
+            labelText.rectTransform.offsetMin = Vector2.zero;
+            labelText.rectTransform.offsetMax = Vector2.zero;
+        }
+
+        void MakeStatBar(Transform parent, string name, Vector2 position, Color color, out RectTransform fillRect, out Text labelText)
+        {
+            var bar = new GameObject(name, typeof(Image));
+            bar.transform.SetParent(parent, false);
+            Image background = bar.GetComponent<Image>();
+            background.color = new Color(0.02f, 0.05f, 0.11f, 0.9f);
+            RectTransform barRect = bar.GetComponent<RectTransform>();
+            barRect.anchorMin = new Vector2(0f, 1f);
+            barRect.anchorMax = new Vector2(0f, 1f);
+            barRect.pivot = new Vector2(0f, 1f);
+            barRect.anchoredPosition = position;
+            barRect.sizeDelta = new Vector2(216f, 18f);
+
+            var fill = new GameObject(name + " Fill", typeof(Image));
+            fill.transform.SetParent(bar.transform, false);
+            Image fillImage = fill.GetComponent<Image>();
+            fillImage.color = color;
+            fillRect = fill.GetComponent<RectTransform>();
+            fillRect.anchorMin = new Vector2(0f, 0f);
+            fillRect.anchorMax = new Vector2(0f, 1f);
+            fillRect.pivot = new Vector2(0f, 0.5f);
+            fillRect.anchoredPosition = Vector2.zero;
+            fillRect.sizeDelta = new Vector2(216f, 0f);
+
+            labelText = MakeText(name + " Label", bar.transform, Vector2.zero, new Vector2(216f, 18f), TextAnchor.MiddleCenter, 11);
             labelText.rectTransform.anchorMin = Vector2.zero;
             labelText.rectTransform.anchorMax = Vector2.one;
             labelText.rectTransform.offsetMin = Vector2.zero;
