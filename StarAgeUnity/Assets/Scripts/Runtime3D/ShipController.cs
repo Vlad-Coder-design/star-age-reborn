@@ -33,7 +33,7 @@ namespace StarAge3D
             StarAgeSaveData data = GameManager.Instance.Save.Data;
             ShipStats stats = ShipStats.For(data.shipId);
             float engineMultiplier = data.engineLevel > 0 ? 1.25f : 1f;
-            float speed = stats.speed * engineMultiplier * (boosterTimer > 0f ? 1.35f : 1f);
+            float speed = stats.speed * 0.72f * engineMultiplier * (boosterTimer > 0f ? 1.35f : 1f);
             boosterTimer = Mathf.Max(0f, boosterTimer - Time.deltaTime);
 
             Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
@@ -91,9 +91,9 @@ namespace StarAge3D
             if (target == null) return;
             fireTimer -= Time.deltaTime;
             if (fireTimer > 0f) return;
-            fireTimer = 0.9f;
+            fireTimer = 1.35f;
             Vector3 direction = (target.transform.position - transform.position).normalized;
-            GameManager.Instance.Space.SpawnProjectile(this, transform.position + direction * 1.1f, direction, 8, Color.red);
+            GameManager.Instance.Space.SpawnProjectile(this, transform.position + direction * 1.1f, direction, 7, Color.red);
         }
 
         void AimAtMouse()

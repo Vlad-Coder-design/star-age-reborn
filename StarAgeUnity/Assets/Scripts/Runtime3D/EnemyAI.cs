@@ -21,12 +21,12 @@ namespace StarAge3D
             float distance = toPlayer.magnitude;
             if (ship.Hp < 24)
             {
-                ship.EnemyMove(-toPlayer, 7f);
+                ship.EnemyMove(-toPlayer, 6.4f);
                 return;
             }
 
-            if (distance < 24f) ship.EnemyMove(toPlayer, 6.5f);
-            if (distance < 18f) ship.EnemyShootAt(player);
+            if (distance < 30f && distance > 12f) ship.EnemyMove(toPlayer, 5.8f);
+            if (distance < 20f) ship.EnemyShootAt(player);
         }
     }
 }

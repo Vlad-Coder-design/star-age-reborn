@@ -113,6 +113,15 @@ namespace StarAge3D
             UI.Refresh();
         }
 
+        public bool TravelToSystem(string systemName, int requiredLevel)
+        {
+            if (Save.Data.level < requiredLevel) return false;
+            Save.Data.currentSystem = systemName;
+            SaveGame();
+            EnterSpaceMode();
+            return true;
+        }
+
         public void EnterPlanetMode()
         {
             Mode = GameMode.Planet;

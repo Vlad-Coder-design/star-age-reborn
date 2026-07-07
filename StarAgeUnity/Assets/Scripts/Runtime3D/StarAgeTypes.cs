@@ -90,6 +90,7 @@ namespace StarAge3D
         public List<QuestSave> quests = new List<QuestSave>();
         public string shipId = "scout";
         public string weaponId = "laser";
+        public string currentSystem = "Fomen";
         public int engineLevel;
         public int cargoModules;
         public int armorModules;
@@ -134,6 +135,7 @@ namespace StarAge3D
             }
             if (string.IsNullOrEmpty(shipId)) shipId = "scout";
             if (string.IsNullOrEmpty(weaponId)) weaponId = "laser";
+            if (string.IsNullOrEmpty(currentSystem)) currentSystem = "Fomen";
             if (shipHp <= 0) shipHp = ShipStats.For(shipId).hp + armorModules * 50;
             if (level <= 0) level = 1;
         }
