@@ -116,9 +116,9 @@ namespace StarAge3D
             BuildStarfield();
             BuildSolarSystem();
             RebuildPlayerShip();
-            for (int i = 0; i < 18; i++) SpawnMiningObject(i < 12);
-            for (int i = 0; i < 5; i++) SpawnPirate();
-            for (int i = 0; i < 4; i++) SpawnNpcMiner();
+            for (int i = 0; i < 30; i++) SpawnMiningObject(i < 20);
+            for (int i = 0; i < 8; i++) SpawnPirate();
+            for (int i = 0; i < 8; i++) SpawnNpcMiner();
         }
 
         void BuildNebulaBackdrop()
@@ -177,9 +177,9 @@ namespace StarAge3D
             AddOrbitRing(42f, new Color(0.12f, 0.42f, 0.82f));
             AddOrbitRing(62f, new Color(0.12f, 0.42f, 0.82f));
 
-            AddSystemPlanet("Aurelia", new Vector3(20f, 0f, 13f), 2.8f, new Color(0.22f, 0.56f, 1f), true);
-            AddSystemPlanet("Vulcan Reach", new Vector3(-35f, 0f, -22f), 3.5f, new Color(0.85f, 0.3f, 0.1f), true);
-            AddSystemPlanet("Ionus", new Vector3(53f, 0f, -31f), 2.4f, new Color(0.4f, 0.9f, 0.55f), false);
+            AddSystemPlanet("Anaksagor", new Vector3(20f, 0f, 13f), 2.8f, new Color(0.22f, 0.56f, 1f), true);
+            AddSystemPlanet("Orion", new Vector3(-35f, 0f, -22f), 3.5f, new Color(0.85f, 0.3f, 0.1f), true);
+            AddSystemPlanet("Aurora", new Vector3(53f, 0f, -31f), 2.4f, new Color(0.4f, 0.9f, 0.55f), false);
         }
 
         void AddOrbitRing(float radius, Color color)
@@ -254,10 +254,10 @@ namespace StarAge3D
         {
             var ship = CreateShipModel("Pirate Ship", new Color(1f, 0.12f, 0.08f), true);
             ship.transform.SetParent(root.transform);
-            ship.transform.position = new Vector3(Random.Range(-34f, 34f), 0f, Random.Range(18f, 48f));
+            ship.transform.position = new Vector3(Random.Range(-42f, 42f), 0f, Random.Range(10f, 58f));
             var controller = ship.AddComponent<ShipController>();
             controller.Init(true);
-            AddNameplate(ship.transform, "Pirate", controller, new Color(1f, 0.32f, 0.26f));
+            AddNameplate(ship.transform, PirateName(), controller, new Color(1f, 0.32f, 0.26f));
             ship.AddComponent<EnemyAI>().Init(controller);
             spawned.Add(ship);
             mapEnemies.Add(ship.transform);
@@ -267,10 +267,22 @@ namespace StarAge3D
         {
             var ship = CreateShipModel("Mining NPC", new Color(0.95f, 0.8f, 0.2f), false);
             ship.transform.SetParent(root.transform);
-            ship.transform.position = new Vector3(Random.Range(-35f, 35f), 0f, Random.Range(-40f, 35f));
+            ship.transform.position = new Vector3(Random.Range(-48f, 48f), 0f, Random.Range(-48f, 42f));
             ship.AddComponent<NpcMiner>();
-            AddSpaceLabel(ship.transform, "Miner", new Color(1f, 0.86f, 0.28f), 2.4f);
+            AddSpaceLabel(ship.transform, MinerName(), new Color(1f, 0.86f, 0.28f), 2.4f);
             spawned.Add(ship);
+        }
+
+        string PirateName()
+        {
+            string[] names = { "Raider [8]", "Stargalax [11]", "Corsair [9]", "Hunter [10]", "Viper [7]" };
+            return names[Random.Range(0, names.Length)];
+        }
+
+        string MinerName()
+        {
+            string[] names = { "Engineer", "Guardian", "Miner [6]", "Trader [5]", "Surveyor" };
+            return names[Random.Range(0, names.Length)];
         }
 
         void SpawnLootBurst(Vector3 position)

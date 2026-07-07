@@ -48,10 +48,10 @@ namespace StarAge3D
             scaler.matchWidthOrHeight = 0.5f;
             canvas.gameObject.AddComponent<GraphicRaycaster>();
 
-            var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -16f), new Vector2(320f, 116f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-            resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -10f), new Vector2(292f, 96f), TextAnchor.UpperLeft, 14);
-            var statusPanel = MakePanel("Status HUD", new Vector2(-16f, -16f), new Vector2(360f, 92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
-            statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -10f), new Vector2(332f, 72f), TextAnchor.UpperRight, 13);
+            var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -14f), new Vector2(560f, 48f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -9f), new Vector2(532f, 32f), TextAnchor.UpperLeft, 14);
+            var statusPanel = MakePanel("Status HUD", new Vector2(-178f, -14f), new Vector2(390f, 48f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -9f), new Vector2(362f, 32f), TextAnchor.UpperRight, 13);
             MakeMinimap();
 
             planetPanel = MakePanel("Planet Controls", new Vector2(0f, 18f), new Vector2(760f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
@@ -61,17 +61,20 @@ namespace StarAge3D
             MakeButton("Shipyard", planetPanel.transform, new Vector2(145f, 27f), new Vector2(126f, 34f), ToggleShipyard);
             MakeButton("Fly To Space", planetPanel.transform, new Vector2(292f, 27f), new Vector2(146f, 34f), GameManager.Instance.EnterSpaceMode);
 
-            spacePanel = MakePanel("Space Controls", new Vector2(0f, 18f), new Vector2(360f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-            MakeButton("Return Planet", spacePanel.transform, new Vector2(-68f, 27f), new Vector2(150f, 34f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Save", spacePanel.transform, new Vector2(92f, 27f), new Vector2(90f, 34f), GameManager.Instance.SaveGame);
+            spacePanel = MakePanel("Space Controls", new Vector2(0f, 12f), new Vector2(760f, 46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
+            MakeButton("Return Planet", spacePanel.transform, new Vector2(-270f, 23f), new Vector2(150f, 30f), GameManager.Instance.EnterPlanetMode);
+            MakeButton("Galaxy", spacePanel.transform, new Vector2(-110f, 23f), new Vector2(120f, 30f), ToggleGalaxyMap);
+            MakeButton("Save", spacePanel.transform, new Vector2(24f, 23f), new Vector2(90f, 30f), GameManager.Instance.SaveGame);
+            MakeButton("Market", spacePanel.transform, new Vector2(144f, 23f), new Vector2(110f, 30f), ToggleMarket);
+            MakeButton("Quests", spacePanel.transform, new Vector2(270f, 23f), new Vector2(110f, 30f), ToggleQuests);
             spaceStatsPanel = MakePanel("Space Status HUD", new Vector2(16f, -142f), new Vector2(320f, 106f), new Vector2(0f, 1f), new Vector2(0f, 1f));
             spaceText = MakeText("Space HUD", spaceStatsPanel.transform, new Vector2(14f, -10f), new Vector2(292f, 86f), TextAnchor.UpperLeft, 13);
 
-            rightRailPanel = MakePanel("Space Right Rail", new Vector2(-18f, 0f), new Vector2(76f, 278f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
-            MakeButton("Map", rightRailPanel.transform, new Vector2(0f, 96f), new Vector2(58f, 42f), ToggleGalaxyMap);
-            MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 38f), new Vector2(58f, 42f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, -20f), new Vector2(58f, 42f), TryRepairShip);
-            MakeButton("Boost", rightRailPanel.transform, new Vector2(0f, -78f), new Vector2(58f, 42f), TryBoostShip);
+            rightRailPanel = MakePanel("Space Right Rail", new Vector2(-14f, -34f), new Vector2(58f, 324f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
+            MakeButton("Map", rightRailPanel.transform, new Vector2(0f, 116f), new Vector2(44f, 36f), ToggleGalaxyMap);
+            MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 62f), new Vector2(44f, 36f), GameManager.Instance.EnterPlanetMode);
+            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, 8f), new Vector2(44f, 36f), TryRepairShip);
+            MakeButton("Go", rightRailPanel.transform, new Vector2(0f, -46f), new Vector2(44f, 36f), TryBoostShip);
 
             detailPanel = MakePanel("Building Details", Vector2.zero, new Vector2(540f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             craftingPanel = MakePanel("Crafting", Vector2.zero, new Vector2(520f, 360f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
@@ -119,12 +122,13 @@ namespace StarAge3D
         public void Refresh()
         {
             if (resourceText == null || GameManager.Instance == null || GameManager.Instance.Resources == null) return;
-            resourceText.text = GameManager.Instance.Resources.Summary();
+            ResourceWallet wallet = GameManager.Instance.Resources.Wallet;
+            resourceText.text = $"HP/Cargo on ship   Stone {wallet.stone}   Uranium {wallet.uranium}   Ice {wallet.ice}   Metal {wallet.metal}   Fuel {wallet.fuel}   Coins {wallet.coins}";
             StarAgeSaveData data = GameManager.Instance.Save.Data;
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
-            statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD + mouse, LMB fire";
-            if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD or RMB fly, LMB/Space fire, Shift boost";
+            statusText.text = $"{GameManager.Instance.Mode}   {ship.label}   {weapon.label}";
+            if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"Orion System   {ship.label}   {weapon.label}";
             if (minimapPanel != null) minimapPanel.SetActive(GameManager.Instance.Mode == GameMode.Space);
             if (GameManager.Instance.Mode == GameMode.Space) DrawMinimap();
 
@@ -133,7 +137,7 @@ namespace StarAge3D
                 ShipController player = GameManager.Instance.Space.PlayerShip;
                 int hp = player != null ? player.Hp : data.shipHp;
                 int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
-                spaceText.text = $"HP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nCoins: {GameManager.Instance.Resources.Wallet.coins}\nR: repair  Shift: boost";
+                spaceText.text = $"Ship: {ship.label}\nHP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nLMB/Space fire  RMB fly";
             }
         }
 
@@ -357,13 +361,22 @@ namespace StarAge3D
             if (!open) return;
             Clear(galaxyPanel.transform);
             AddTitle(galaxyPanel, "Galaxy Map");
-            AddText(galaxyPanel, "Orion is the playable MVP system. Other systems are marked as travel targets for the next prototype pass.", new Vector2(-310f, 188f), new Vector2(620f, 48f));
+            AddText(galaxyPanel, "Route network prototype. Orion is playable now; nearby systems are visual targets like the Starkus map.", new Vector2(-310f, 188f), new Vector2(620f, 48f));
 
-            AddGalaxySystem("Orion", "Home system", new Vector2(0f, 60f), new Color(1f, 0.84f, 0.25f), true);
-            AddGalaxySystem("Aurora", "Ice fields", new Vector2(-230f, 120f), new Color(0.32f, 0.82f, 1f), false);
-            AddGalaxySystem("Asgard", "Trade hub", new Vector2(220f, 132f), new Color(0.62f, 1f, 0.62f), false);
-            AddGalaxySystem("Sparta", "Pirate danger", new Vector2(-210f, -92f), new Color(1f, 0.22f, 0.18f), false);
-            AddGalaxySystem("Frontier", "Asteroid belt", new Vector2(240f, -118f), new Color(0.82f, 0.68f, 1f), false);
+            Vector2 orion = new Vector2(0f, 58f);
+            Vector2 aurora = new Vector2(-230f, 120f);
+            Vector2 asgard = new Vector2(220f, 132f);
+            Vector2 sparta = new Vector2(-210f, -92f);
+            Vector2 frontier = new Vector2(240f, -118f);
+            AddGalaxyConnection(orion, aurora);
+            AddGalaxyConnection(orion, asgard);
+            AddGalaxyConnection(orion, sparta);
+            AddGalaxyConnection(orion, frontier);
+            AddGalaxySystem("Orion", "Home star", orion, new Color(1f, 0.84f, 0.25f), true);
+            AddGalaxySystem("Aurora", "Ice fields", aurora, new Color(0.32f, 0.82f, 1f), false);
+            AddGalaxySystem("Asgard", "Trade hub", asgard, new Color(0.62f, 1f, 0.62f), false);
+            AddGalaxySystem("Sparta", "Pirate danger", sparta, new Color(1f, 0.22f, 0.18f), false);
+            AddGalaxySystem("Frontier", "Asteroid belt", frontier, new Color(0.82f, 0.68f, 1f), false);
             AddText(galaxyPanel, "Tip: use the space view to mine asteroids, fight pirates, collect loot, and return home to upgrade the colony.", new Vector2(-310f, -204f), new Vector2(620f, 44f));
             MakeButton("Close", galaxyPanel.transform, new Vector2(0f, -236f), new Vector2(180f, 34f), HidePopups);
         }
@@ -377,6 +390,18 @@ namespace StarAge3D
             rect.anchoredPosition = position;
             rect.sizeDelta = active ? new Vector2(24f, 24f) : new Vector2(18f, 18f);
             AddText(galaxyPanel, $"{title}\n{subtitle}", position + new Vector2(18f, 16f), new Vector2(160f, 48f));
+        }
+
+        void AddGalaxyConnection(Vector2 a, Vector2 b)
+        {
+            var line = new GameObject("Galaxy Route", typeof(Image));
+            line.transform.SetParent(galaxyPanel.transform, false);
+            line.GetComponent<Image>().color = new Color(0.18f, 0.55f, 0.95f, 0.38f);
+            RectTransform rect = line.GetComponent<RectTransform>();
+            Vector2 delta = b - a;
+            rect.anchoredPosition = a + delta * 0.5f;
+            rect.sizeDelta = new Vector2(delta.magnitude, 3f);
+            rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
         }
 
         void TryRepairShip()
