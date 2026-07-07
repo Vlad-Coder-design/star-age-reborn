@@ -110,6 +110,7 @@ namespace StarAge3D
             if (!IsEnemy) GameManager.Instance.Save.Data.shipHp = Hp;
             if (Hp <= 0)
             {
+                GameManager.Instance.Space.SpawnShipExplosion(transform.position, IsEnemy);
                 if (IsEnemy)
                 {
                     EnemyAI ai = GetComponent<EnemyAI>();

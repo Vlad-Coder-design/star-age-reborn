@@ -81,6 +81,15 @@ namespace StarAge3D
             spawned.Add(bolt);
         }
 
+        public void SpawnShipExplosion(Vector3 position, bool pirate)
+        {
+            var explosion = new GameObject(pirate ? "Pirate Ship Explosion" : "Player Ship Explosion");
+            explosion.transform.SetParent(root.transform);
+            explosion.transform.position = position;
+            explosion.AddComponent<ExplosionEffect>().Init(pirate);
+            spawned.Add(explosion);
+        }
+
         public void PirateDestroyed(EnemyAI pirate)
         {
             ResourceWallet wallet = GameManager.Instance.Resources.Wallet;
