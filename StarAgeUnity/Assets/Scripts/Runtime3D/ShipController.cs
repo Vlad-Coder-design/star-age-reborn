@@ -71,8 +71,8 @@ namespace StarAge3D
             fireTimer -= Time.deltaTime;
             if (Input.GetMouseButtonDown(1)) SetMoveTargetFromMouse();
             if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) TryShoot();
-            if (Input.GetKeyDown(KeyCode.LeftShift)) UseBooster();
-            if (Input.GetKeyDown(KeyCode.R)) UseRepairKit();
+            if (Input.GetKeyDown(KeyCode.LeftShift)) TryUseBooster();
+            if (Input.GetKeyDown(KeyCode.R)) TryUseRepairKit();
         }
 
         public void EnemyMove(Vector3 direction, float speed)
@@ -129,20 +129,23 @@ namespace StarAge3D
             GameManager.Instance.Space.SpawnProjectile(this, transform.position + transform.forward * 1.2f, transform.forward, weapon.damage, new Color(0.4f, 0.9f, 1f));
         }
 
-        void UseBooster()
+        public bool TryUseBooster()
         {
-            if (boosterTimer > 0f) return;
-            if (!GameManager.Instance.Resources.Spend(ResourceType.Boosters, 1)) return;
+            if (boosterTimer > 0f) return false;
+            if (!GameManager.Instance.Resources.Spend(ResourceType.Boosters, 1)) return false;
             boosterTimer = 30f;
+            GameManager.Instance.UI.Refresh();
+            return true;
         }
 
-        void UseRepairKit()
+        public bool TryUseRepairKit()
         {
-            if (Hp >= MaxHp) return;
-            if (!GameManager.Instance.Resources.Spend(ResourceType.RepairKits, 1)) return;
+            if (Hp >= MaxHp) return false;
+            if (!GameManager.Instance.Resources.Spend(ResourceType.RepairKits, 1)) return false;
             Hp = Mathf.Min(MaxHp, Hp + 20);
             GameManager.Instance.Save.Data.shipHp = Hp;
             GameManager.Instance.SaveGame();
+            return true;
         }
 
         public void TakeDamage(int amount)

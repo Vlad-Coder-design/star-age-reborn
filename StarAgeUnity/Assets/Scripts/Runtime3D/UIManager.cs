@@ -10,6 +10,7 @@ namespace StarAge3D
         Text resourceText;
         Text statusText;
         Text spaceText;
+        GameObject minimapPanel;
         RawImage minimapImage;
         Texture2D minimapTexture;
         GameObject planetPanel;
@@ -19,6 +20,9 @@ namespace StarAge3D
         GameObject questPanel;
         GameObject shipyardPanel;
         GameObject spacePanel;
+        GameObject spaceStatsPanel;
+        GameObject rightRailPanel;
+        GameObject galaxyPanel;
         float refreshTimer;
 
         readonly BuildingType[] buildable =
@@ -60,13 +64,21 @@ namespace StarAge3D
             spacePanel = MakePanel("Space Controls", new Vector2(0f, 18f), new Vector2(360f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
             MakeButton("Return Planet", spacePanel.transform, new Vector2(-68f, 27f), new Vector2(150f, 34f), GameManager.Instance.EnterPlanetMode);
             MakeButton("Save", spacePanel.transform, new Vector2(92f, 27f), new Vector2(90f, 34f), GameManager.Instance.SaveGame);
-            spaceText = MakeText("Space HUD", canvas.transform, new Vector2(-16f, -118f), new Vector2(340f, 112f), TextAnchor.UpperRight, 13);
+            spaceStatsPanel = MakePanel("Space Status HUD", new Vector2(16f, -142f), new Vector2(320f, 106f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+            spaceText = MakeText("Space HUD", spaceStatsPanel.transform, new Vector2(14f, -10f), new Vector2(292f, 86f), TextAnchor.UpperLeft, 13);
+
+            rightRailPanel = MakePanel("Space Right Rail", new Vector2(-18f, 0f), new Vector2(76f, 278f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
+            MakeButton("Map", rightRailPanel.transform, new Vector2(0f, 96f), new Vector2(58f, 42f), ToggleGalaxyMap);
+            MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 38f), new Vector2(58f, 42f), GameManager.Instance.EnterPlanetMode);
+            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, -20f), new Vector2(58f, 42f), TryRepairShip);
+            MakeButton("Boost", rightRailPanel.transform, new Vector2(0f, -78f), new Vector2(58f, 42f), TryBoostShip);
 
             detailPanel = MakePanel("Building Details", Vector2.zero, new Vector2(540f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             craftingPanel = MakePanel("Crafting", Vector2.zero, new Vector2(520f, 360f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             marketPanel = MakePanel("Market", Vector2.zero, new Vector2(520f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             questPanel = MakePanel("Quest Board", Vector2.zero, new Vector2(700f, 520f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             shipyardPanel = MakePanel("Shipyard", Vector2.zero, new Vector2(560f, 460f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            galaxyPanel = MakePanel("Galaxy Map", Vector2.zero, new Vector2(760f, 520f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
             HidePopups();
             Refresh();
@@ -86,7 +98,9 @@ namespace StarAge3D
         {
             planetPanel.SetActive(true);
             spacePanel.SetActive(false);
-            spaceText.gameObject.SetActive(false);
+            if (spaceStatsPanel != null) spaceStatsPanel.SetActive(false);
+            if (rightRailPanel != null) rightRailPanel.SetActive(false);
+            if (minimapPanel != null) minimapPanel.SetActive(false);
             HidePopups();
             Refresh();
         }
@@ -95,7 +109,9 @@ namespace StarAge3D
         {
             planetPanel.SetActive(false);
             spacePanel.SetActive(true);
-            spaceText.gameObject.SetActive(true);
+            if (spaceStatsPanel != null) spaceStatsPanel.SetActive(true);
+            if (rightRailPanel != null) rightRailPanel.SetActive(true);
+            if (minimapPanel != null) minimapPanel.SetActive(true);
             HidePopups();
             Refresh();
         }
@@ -109,7 +125,7 @@ namespace StarAge3D
             WeaponStats weapon = WeaponStats.For(data.weaponId);
             statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD + mouse, LMB fire";
             if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD or RMB fly, LMB/Space fire, Shift boost";
-            if (minimapImage != null) minimapImage.gameObject.SetActive(GameManager.Instance.Mode == GameMode.Space);
+            if (minimapPanel != null) minimapPanel.SetActive(GameManager.Instance.Mode == GameMode.Space);
             if (GameManager.Instance.Mode == GameMode.Space) DrawMinimap();
 
             if (spaceText != null && spaceText.gameObject.activeSelf)
@@ -117,17 +133,17 @@ namespace StarAge3D
                 ShipController player = GameManager.Instance.Space.PlayerShip;
                 int hp = player != null ? player.Hp : data.shipHp;
                 int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
-                spaceText.text = $"HP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nCoins: {GameManager.Instance.Resources.Wallet.coins}\nActive quests update automatically.";
+                spaceText.text = $"HP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nCoins: {GameManager.Instance.Resources.Wallet.coins}\nR: repair  Shift: boost";
             }
         }
 
         void MakeMinimap()
         {
-            var panel = MakePanel("Reference Minimap", new Vector2(-16f, -116f), new Vector2(166f, 166f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            minimapPanel = MakePanel("Reference Minimap", new Vector2(-16f, -116f), new Vector2(166f, 166f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             minimapTexture = new Texture2D(148, 148, TextureFormat.RGBA32, false);
             minimapTexture.filterMode = FilterMode.Point;
             var imageObject = new GameObject("Minimap Image", typeof(RawImage));
-            imageObject.transform.SetParent(panel.transform, false);
+            imageObject.transform.SetParent(minimapPanel.transform, false);
             minimapImage = imageObject.GetComponent<RawImage>();
             minimapImage.texture = minimapTexture;
             RectTransform rect = minimapImage.rectTransform;
@@ -333,6 +349,48 @@ namespace StarAge3D
             MakeButton("Close", shipyardPanel.transform, new Vector2(0f, -185f), new Vector2(180f, 34f), HidePopups);
         }
 
+        void ToggleGalaxyMap()
+        {
+            bool open = !galaxyPanel.activeSelf;
+            HidePopups();
+            galaxyPanel.SetActive(open);
+            if (!open) return;
+            Clear(galaxyPanel.transform);
+            AddTitle(galaxyPanel, "Galaxy Map");
+            AddText(galaxyPanel, "Orion is the playable MVP system. Other systems are marked as travel targets for the next prototype pass.", new Vector2(-310f, 188f), new Vector2(620f, 48f));
+
+            AddGalaxySystem("Orion", "Home system", new Vector2(0f, 60f), new Color(1f, 0.84f, 0.25f), true);
+            AddGalaxySystem("Aurora", "Ice fields", new Vector2(-230f, 120f), new Color(0.32f, 0.82f, 1f), false);
+            AddGalaxySystem("Asgard", "Trade hub", new Vector2(220f, 132f), new Color(0.62f, 1f, 0.62f), false);
+            AddGalaxySystem("Sparta", "Pirate danger", new Vector2(-210f, -92f), new Color(1f, 0.22f, 0.18f), false);
+            AddGalaxySystem("Frontier", "Asteroid belt", new Vector2(240f, -118f), new Color(0.82f, 0.68f, 1f), false);
+            AddText(galaxyPanel, "Tip: use the space view to mine asteroids, fight pirates, collect loot, and return home to upgrade the colony.", new Vector2(-310f, -204f), new Vector2(620f, 44f));
+            MakeButton("Close", galaxyPanel.transform, new Vector2(0f, -236f), new Vector2(180f, 34f), HidePopups);
+        }
+
+        void AddGalaxySystem(string title, string subtitle, Vector2 position, Color color, bool active)
+        {
+            var marker = new GameObject(title + " Marker", typeof(Image));
+            marker.transform.SetParent(galaxyPanel.transform, false);
+            marker.GetComponent<Image>().color = color;
+            RectTransform rect = marker.GetComponent<RectTransform>();
+            rect.anchoredPosition = position;
+            rect.sizeDelta = active ? new Vector2(24f, 24f) : new Vector2(18f, 18f);
+            AddText(galaxyPanel, $"{title}\n{subtitle}", position + new Vector2(18f, 16f), new Vector2(160f, 48f));
+        }
+
+        void TryRepairShip()
+        {
+            ShipController player = GameManager.Instance.Space.PlayerShip;
+            if (player != null) player.TryUseRepairKit();
+        }
+
+        void TryBoostShip()
+        {
+            ShipController player = GameManager.Instance.Space.PlayerShip;
+            if (player != null) player.TryUseBooster();
+        }
+
         void HidePopups()
         {
             if (detailPanel != null) detailPanel.SetActive(false);
@@ -340,6 +398,7 @@ namespace StarAge3D
             if (marketPanel != null) marketPanel.SetActive(false);
             if (questPanel != null) questPanel.SetActive(false);
             if (shipyardPanel != null) shipyardPanel.SetActive(false);
+            if (galaxyPanel != null) galaxyPanel.SetActive(false);
         }
 
         GameObject MakePanel(string name, Vector2 position, Vector2 size, Vector2 anchor, Vector2 pivot)
@@ -347,7 +406,7 @@ namespace StarAge3D
             var panel = new GameObject(name, typeof(Image));
             panel.transform.SetParent(canvas.transform, false);
             Image image = panel.GetComponent<Image>();
-            image.color = new Color(0.015f, 0.025f, 0.045f, 0.78f);
+            image.color = new Color(0.012f, 0.028f, 0.055f, 0.84f);
             RectTransform rect = panel.GetComponent<RectTransform>();
             rect.anchorMin = anchor;
             rect.anchorMax = anchor;
@@ -392,7 +451,7 @@ namespace StarAge3D
             var buttonObject = new GameObject(label, typeof(Image), typeof(Button));
             buttonObject.transform.SetParent(parent, false);
             Image image = buttonObject.GetComponent<Image>();
-            image.color = new Color(0.08f, 0.22f, 0.38f, 0.94f);
+            image.color = new Color(0.08f, 0.24f, 0.44f, 0.96f);
             RectTransform rect = buttonObject.GetComponent<RectTransform>();
             rect.anchoredPosition = position;
             rect.sizeDelta = size;

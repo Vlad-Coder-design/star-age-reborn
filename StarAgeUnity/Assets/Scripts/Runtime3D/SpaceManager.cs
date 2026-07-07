@@ -28,9 +28,9 @@ namespace StarAge3D
         {
             if (GameManager.Instance == null || GameManager.Instance.Mode != GameMode.Space || PlayerShip == null) return;
             Camera cam = GameManager.Instance.MainCamera;
-            Vector3 target = PlayerShip.transform.position + new Vector3(0f, 42f, -34f);
+            Vector3 target = PlayerShip.transform.position + new Vector3(0f, 62f, 30f);
             cam.transform.position = Vector3.Lerp(cam.transform.position, target, 0.08f);
-            cam.transform.LookAt(PlayerShip.transform.position + Vector3.forward * 8f);
+            cam.transform.LookAt(PlayerShip.transform.position);
         }
 
         public void SetActive(bool active)
@@ -123,21 +123,28 @@ namespace StarAge3D
 
         void BuildNebulaBackdrop()
         {
+            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            floor.name = "Deep Space Nebula Floor";
+            floor.transform.SetParent(root.transform);
+            floor.transform.position = new Vector3(0f, -14f, 0f);
+            floor.transform.localScale = new Vector3(180f, 1f, 180f);
+            floor.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(0.006f, 0.014f, 0.035f));
+
             Color[] colors =
             {
-                new Color(0.02f, 0.12f, 0.16f),
-                new Color(0.12f, 0.04f, 0.16f),
-                new Color(0.08f, 0.12f, 0.04f),
-                new Color(0.14f, 0.05f, 0.04f)
+                new Color(0.008f, 0.055f, 0.095f),
+                new Color(0.055f, 0.018f, 0.085f),
+                new Color(0.035f, 0.055f, 0.11f),
+                new Color(0.07f, 0.028f, 0.03f)
             };
 
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 12; i++)
             {
                 var cloud = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                cloud.name = "Distant Nebula Cloud";
+                cloud.name = "Soft Nebula Patch";
                 cloud.transform.SetParent(root.transform);
-                cloud.transform.position = new Vector3(Random.Range(-110f, 110f), -18f, Random.Range(-110f, 110f));
-                cloud.transform.localScale = new Vector3(Random.Range(18f, 36f), 0.35f, Random.Range(14f, 32f));
+                cloud.transform.position = new Vector3(Random.Range(-150f, 150f), -13.6f, Random.Range(-150f, 150f));
+                cloud.transform.localScale = new Vector3(Random.Range(16f, 34f), 0.04f, Random.Range(12f, 28f));
                 cloud.GetComponent<Renderer>().material = RuntimeMaterial.Create(colors[Random.Range(0, colors.Length)], true);
             }
         }
@@ -166,9 +173,9 @@ namespace StarAge3D
             light.intensity = 5f;
             light.range = 95f;
 
-            AddOrbitRing(24f, new Color(0.22f, 0.44f, 0.85f));
-            AddOrbitRing(42f, new Color(0.22f, 0.44f, 0.85f));
-            AddOrbitRing(62f, new Color(0.22f, 0.44f, 0.85f));
+            AddOrbitRing(24f, new Color(0.12f, 0.42f, 0.82f));
+            AddOrbitRing(42f, new Color(0.12f, 0.42f, 0.82f));
+            AddOrbitRing(62f, new Color(0.12f, 0.42f, 0.82f));
 
             AddSystemPlanet("Aurelia", new Vector3(20f, 0f, 13f), 2.8f, new Color(0.22f, 0.56f, 1f), true);
             AddSystemPlanet("Vulcan Reach", new Vector3(-35f, 0f, -22f), 3.5f, new Color(0.85f, 0.3f, 0.1f), true);
@@ -217,14 +224,15 @@ namespace StarAge3D
 
         void BuildStarfield()
         {
-            for (int i = 0; i < 220; i++)
+            for (int i = 0; i < 420; i++)
             {
                 var star = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 star.name = "Star";
                 star.transform.SetParent(root.transform);
-                star.transform.position = new Vector3(Random.Range(-90f, 90f), Random.Range(-20f, 35f), Random.Range(-90f, 90f));
-                star.transform.localScale = Vector3.one * Random.Range(0.04f, 0.12f);
-                star.GetComponent<Renderer>().material = Mat(Color.white);
+                star.transform.position = new Vector3(Random.Range(-180f, 180f), Random.Range(-8f, 70f), Random.Range(-180f, 180f));
+                star.transform.localScale = Vector3.one * Random.Range(0.035f, 0.16f);
+                Color tint = Random.value > 0.82f ? new Color(0.55f, 0.82f, 1f) : new Color(0.86f, 0.91f, 1f);
+                star.GetComponent<Renderer>().material = Mat(tint);
             }
         }
 

@@ -120,6 +120,9 @@ namespace StarAge3D
             Space.SetActive(true);
             UI.ShowSpaceHud();
             MainCamera.orthographic = false;
+            MainCamera.fieldOfView = 52f;
+            MainCamera.clearFlags = CameraClearFlags.SolidColor;
+            MainCamera.backgroundColor = new Color(0.004f, 0.008f, 0.02f);
         }
 
         void BuildCamera()
