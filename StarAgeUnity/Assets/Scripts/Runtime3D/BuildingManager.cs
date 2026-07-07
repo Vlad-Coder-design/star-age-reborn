@@ -93,27 +93,53 @@ namespace StarAge3D
             rim.transform.localScale = new Vector3(10.25f, 0.08f, 10.25f);
             rim.GetComponent<Renderer>().material = Mat(new Color(0.18f, 0.11f, 0.09f));
 
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 9; i++)
             {
-                var crack = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                crack.name = "Lava Crack";
-                crack.transform.SetParent(root.transform);
-                Vector2 p = RandomDisc(6.65f);
-                crack.transform.position = new Vector3(p.x, 0.52f, p.y);
-                crack.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 180f), 0f);
-                crack.transform.localScale = new Vector3(Random.Range(0.045f, 0.1f), 0.025f, Random.Range(0.65f, 1.75f));
-                crack.GetComponent<Renderer>().material = Mat(new Color(1f, 0.38f, 0.08f), true);
+                Vector2 p = RandomDisc(6.2f);
+                float size = Random.Range(0.7f, 1.45f);
+                AddPlanetDisc("Cooling Lava Edge", p, 0.532f, new Vector3(size * 1.35f, 0.015f, size * 0.82f), new Color(0.12f, 0.055f, 0.035f), false, Random.Range(0f, 180f));
+                AddPlanetDisc("Molten Lava Pool", p, 0.558f, new Vector3(size * 1.1f, 0.018f, size * 0.65f), new Color(1f, 0.24f, 0.04f), true, Random.Range(0f, 180f));
             }
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 16; i++)
             {
-                var crater = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                crater.name = "Crater";
-                crater.transform.SetParent(root.transform);
+                Vector2 p = RandomDisc(6.65f);
+                float angle = Random.Range(0f, 180f);
+                AddPlanetBox("Branching Lava Fissure", p, 0.565f, new Vector3(Random.Range(0.05f, 0.11f), 0.025f, Random.Range(0.55f, 1.25f)), new Color(1f, 0.38f, 0.08f), true, angle);
+
+                if (Random.value > 0.35f)
+                {
+                    Vector2 branch = p + Random.insideUnitCircle * 0.35f;
+                    AddPlanetBox("Small Lava Branch", branch, 0.57f, new Vector3(Random.Range(0.035f, 0.07f), 0.02f, Random.Range(0.28f, 0.65f)), new Color(1f, 0.52f, 0.11f), true, angle + Random.Range(35f, 70f));
+                }
+            }
+
+            for (int i = 0; i < 14; i++)
+            {
                 Vector2 p = RandomDisc(6.55f);
-                crater.transform.position = new Vector3(p.x, 0.55f, p.y);
-                crater.transform.localScale = new Vector3(Random.Range(0.5f, 1.2f), 0.05f, Random.Range(0.5f, 1.2f));
-                crater.GetComponent<Renderer>().material = Mat(new Color(0.08f, 0.06f, 0.055f));
+                float size = Random.Range(0.45f, 1.05f);
+                AddPlanetDisc("Raised Crater Rim", p, 0.565f, new Vector3(size * 1.28f, 0.035f, size * 1.05f), new Color(0.24f, 0.15f, 0.12f), false, Random.Range(0f, 180f));
+                AddPlanetDisc("Shadowed Crater Bowl", p, 0.59f, new Vector3(size, 0.022f, size * 0.78f), new Color(0.055f, 0.045f, 0.045f), false, Random.Range(0f, 180f));
+            }
+
+            for (int i = 0; i < 26; i++)
+            {
+                Vector2 p = RandomDisc(6.8f);
+                float size = Random.Range(0.16f, 0.42f);
+                AddRock("Basalt Boulder", p, new Vector3(size * Random.Range(1.0f, 1.7f), size * Random.Range(0.55f, 1.0f), size * Random.Range(0.8f, 1.35f)), new Color(0.1f, 0.085f, 0.08f), Random.Range(0f, 180f));
+            }
+
+            for (int i = 0; i < 18; i++)
+            {
+                Vector2 p = RandomDisc(6.4f);
+                AddPlanetDisc("Rust Mineral Patch", p, 0.575f, new Vector3(Random.Range(0.28f, 0.62f), 0.018f, Random.Range(0.18f, 0.42f)), new Color(0.64f, 0.31f, 0.16f), false, Random.Range(0f, 180f));
+            }
+
+            for (int i = 0; i < 12; i++)
+            {
+                Vector2 p = RandomDisc(6.2f);
+                float height = Random.Range(0.18f, 0.42f);
+                AddPlanetBox("Uranium Crystal", p, 0.74f, new Vector3(0.08f, height, 0.08f), new Color(0.35f, 1f, 0.42f), true, Random.Range(0f, 180f));
             }
 
             for (int i = 0; i < 90; i++)
@@ -125,6 +151,39 @@ namespace StarAge3D
                 star.transform.localScale = Vector3.one * Random.Range(0.025f, 0.075f);
                 star.GetComponent<Renderer>().material = Mat(new Color(0.8f, 0.9f, 1f), true);
             }
+        }
+
+        void AddPlanetDisc(string name, Vector2 position, float height, Vector3 scale, Color color, bool emissive, float rotationY)
+        {
+            var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            disc.name = name;
+            disc.transform.SetParent(root.transform);
+            disc.transform.position = new Vector3(position.x, height, position.y);
+            disc.transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
+            disc.transform.localScale = scale;
+            disc.GetComponent<Renderer>().material = Mat(color, emissive);
+        }
+
+        void AddPlanetBox(string name, Vector2 position, float height, Vector3 scale, Color color, bool emissive, float rotationY)
+        {
+            var box = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            box.name = name;
+            box.transform.SetParent(root.transform);
+            box.transform.position = new Vector3(position.x, height, position.y);
+            box.transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
+            box.transform.localScale = scale;
+            box.GetComponent<Renderer>().material = Mat(color, emissive);
+        }
+
+        void AddRock(string name, Vector2 position, Vector3 scale, Color color, float rotationY)
+        {
+            var rock = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            rock.name = name;
+            rock.transform.SetParent(root.transform);
+            rock.transform.position = new Vector3(position.x, 0.66f, position.y);
+            rock.transform.rotation = Quaternion.Euler(Random.Range(-10f, 10f), rotationY, Random.Range(-10f, 10f));
+            rock.transform.localScale = scale;
+            rock.GetComponent<Renderer>().material = Mat(color);
         }
 
         void BuildSlots()
