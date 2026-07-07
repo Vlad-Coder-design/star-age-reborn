@@ -33,9 +33,10 @@ namespace StarAge3D
         public bool BuyEngine()
         {
             StarAgeSaveData data = GameManager.Instance.Save.Data;
-            if (GameManager.Instance.Resources.Wallet.coins < 650) return false;
-            GameManager.Instance.Resources.Wallet.coins -= 650;
-            data.engineLevel += 1;
+            if (data.engineLevel > 0) return true;
+            if (GameManager.Instance.Resources.Wallet.coins < 1500) return false;
+            GameManager.Instance.Resources.Wallet.coins -= 1500;
+            data.engineLevel = 1;
             GameManager.Instance.SaveGame();
             return true;
         }

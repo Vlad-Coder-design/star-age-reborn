@@ -107,6 +107,7 @@ namespace StarAge3D
             wallet.metal += Random.Range(0, 2);
             wallet.fuel += Random.Range(0, 2);
             GameManager.Instance.Quests.AddProgress(QuestType.DestroyPirates, 1);
+            GameManager.Instance.AddXp(25);
             GameManager.Instance.SaveGame();
         }
 
@@ -154,34 +155,30 @@ namespace StarAge3D
         void BuildSolarSystem()
         {
             var sun = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sun.name = "Orion Star";
+            sun.name = "Fomen Star";
             sun.transform.SetParent(root.transform);
-            sun.transform.position = Vector3.zero;
-            sun.transform.localScale = Vector3.one * 7.5f;
+            sun.transform.position = new Vector3(0f, 0f, 150f);
+            sun.transform.localScale = Vector3.one * 6f;
             sun.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(1f, 0.86f, 0.18f), true);
 
             var sunHalo = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sunHalo.name = "Orion Star Glow";
+            sunHalo.name = "Fomen Star Glow";
             sunHalo.transform.SetParent(root.transform);
-            sunHalo.transform.position = Vector3.zero;
-            sunHalo.transform.localScale = Vector3.one * 11f;
+            sunHalo.transform.position = sun.transform.position;
+            sunHalo.transform.localScale = Vector3.one * 9f;
             sunHalo.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(1f, 0.45f, 0.08f), true);
 
-            var light = new GameObject("Orion Star Light").AddComponent<Light>();
+            var light = new GameObject("Fomen Star Light").AddComponent<Light>();
             light.transform.SetParent(root.transform);
-            light.transform.position = new Vector3(0f, 8f, 0f);
+            light.transform.position = new Vector3(0f, 12f, 75f);
             light.type = LightType.Point;
             light.color = new Color(1f, 0.72f, 0.28f);
             light.intensity = 5f;
             light.range = 95f;
 
-            AddOrbitRing(24f, new Color(0.12f, 0.42f, 0.82f));
-            AddOrbitRing(42f, new Color(0.12f, 0.42f, 0.82f));
-            AddOrbitRing(62f, new Color(0.12f, 0.42f, 0.82f));
-
-            AddSystemPlanet("Anaksagor", new Vector3(20f, 0f, 13f), 2.8f, new Color(0.22f, 0.56f, 1f), true);
-            AddSystemPlanet("Orion", new Vector3(-35f, 0f, -22f), 3.5f, new Color(0.85f, 0.3f, 0.1f), true);
-            AddSystemPlanet("Aurora", new Vector3(53f, 0f, -31f), 2.4f, new Color(0.4f, 0.9f, 0.55f), false);
+            AddSystemPlanet("Novara", new Vector3(-28f, 0f, 118f), 3.5f, new Color(0.85f, 0.32f, 0.12f), true);
+            AddSystemPlanet("Veles", new Vector3(34f, 0f, 134f), 3.2f, new Color(0.45f, 0.85f, 0.44f), true);
+            AddSystemPlanet("Kryos", new Vector3(64f, 0f, 164f), 2.7f, new Color(0.42f, 0.84f, 1f), false);
         }
 
         void AddOrbitRing(float radius, Color color)
@@ -303,13 +300,13 @@ namespace StarAge3D
 
         string PirateName()
         {
-            string[] names = { "Raider [8]", "Stargalax [11]", "Corsair [9]", "Hunter [10]", "Viper [7]" };
+            string[] names = { "Dart Predator", "UltraDark", "Stargalax", "Red Fang", "Void Reaper", "Kessler", "Black Comet", "Iron Wolf" };
             return names[Random.Range(0, names.Length)];
         }
 
         string MinerName()
         {
-            string[] names = { "Engineer", "Guardian", "Miner [6]", "Trader [5]", "Surveyor" };
+            string[] names = { "Ore Hauler", "Dusty", "Prospector", "Rock Biter", "Deep Core" };
             return names[Random.Range(0, names.Length)];
         }
 

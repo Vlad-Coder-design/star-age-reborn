@@ -20,6 +20,7 @@ namespace StarAge3D
 
             int amount = Random.Range(2, 5);
             GameManager.Instance.Space.AddCargo(resource, amount);
+            GameManager.Instance.AddXp(8);
             Destroy(gameObject);
         }
     }

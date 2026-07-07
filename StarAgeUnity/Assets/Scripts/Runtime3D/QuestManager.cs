@@ -28,10 +28,10 @@ namespace StarAge3D
         {
             switch (type)
             {
-                case QuestType.DestroyPirates: return "Destroy 3 pirates";
-                case QuestType.MineStone: return "Mine 10 stone from asteroids";
-                case QuestType.DeliverFuel: return "Deliver 5 fuel";
-                case QuestType.CollectIce: return "Collect 8 ice from comets";
+                case QuestType.DestroyPirates: return "Pirate bounty x3";
+                case QuestType.MineStone: return "Stone shipment x9";
+                case QuestType.DeliverFuel: return "Fuel delivery x5";
+                case QuestType.CollectIce: return "Ice harvest x7";
                 default: return type.ToString();
             }
         }
@@ -40,10 +40,10 @@ namespace StarAge3D
         {
             switch (type)
             {
-                case QuestType.DestroyPirates: return "Clear pirate raiders from nearby space. Reward: 100 coins and 2 uranium.";
-                case QuestType.MineStone: return "Mine asteroid stone for colony expansion. Reward: 80 coins.";
-                case QuestType.DeliverFuel: return "Deliver 5 fuel to a frontier convoy. Reward: 150 coins.";
-                case QuestType.CollectIce: return "Collect comet ice for life support. Reward: 90 coins.";
+                case QuestType.DestroyPirates: return "Local traders are under attack. Destroy 3 pirate ships in any system. Reward: 560 credits.";
+                case QuestType.MineStone: return "A construction guild needs 9 stone. Mine asteroids and deliver the cargo. Reward: 148 credits.";
+                case QuestType.DeliverFuel: return "A frontier convoy needs 5 fuel. Load or craft fuel and deliver it from Novara. Reward: 260 credits.";
+                case QuestType.CollectIce: return "Hydroponics farms request 7 ice. Break comets and deliver the cargo. Reward: 100 credits.";
                 default: return "";
             }
         }
@@ -51,9 +51,9 @@ namespace StarAge3D
         public int Target(QuestType type)
         {
             if (type == QuestType.DestroyPirates) return 3;
-            if (type == QuestType.MineStone) return 10;
+            if (type == QuestType.MineStone) return 9;
             if (type == QuestType.DeliverFuel) return 5;
-            if (type == QuestType.CollectIce) return 8;
+            if (type == QuestType.CollectIce) return 7;
             return 1;
         }
 
@@ -85,20 +85,19 @@ namespace StarAge3D
 
             if (quest.type == QuestType.DestroyPirates)
             {
-                wallet.coins += 100;
-                wallet.uranium += 2;
+                wallet.coins += 560;
             }
             else if (quest.type == QuestType.MineStone)
             {
-                wallet.coins += 80;
+                wallet.coins += 148;
             }
             else if (quest.type == QuestType.DeliverFuel)
             {
-                wallet.coins += 150;
+                wallet.coins += 260;
             }
             else if (quest.type == QuestType.CollectIce)
             {
-                wallet.coins += 90;
+                wallet.coins += 100;
             }
 
             quest.completed = true;

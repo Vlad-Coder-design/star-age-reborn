@@ -54,18 +54,18 @@ namespace StarAge3D
 
             var resourcePanel = MakePanel("Resource HUD", new Vector2(16f, -14f), new Vector2(330f, 88f), new Vector2(0f, 1f), new Vector2(0f, 1f));
             MakeStatBar(resourcePanel.transform, "Hull Bar", new Vector2(14f, -10f), new Color(0.23f, 0.9f, 0.38f), out hpBarFill, out hpBarText);
-            MakeStatBar(resourcePanel.transform, "Cargo Bar", new Vector2(14f, -36f), new Color(1f, 0.62f, 0.16f), out cargoBarFill, out cargoBarText);
+            MakeStatBar(resourcePanel.transform, "XP Bar", new Vector2(14f, -36f), new Color(1f, 0.62f, 0.16f), out cargoBarFill, out cargoBarText);
             resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -64f), new Vector2(302f, 20f), TextAnchor.UpperLeft, 11);
             var statusPanel = MakePanel("Status HUD", new Vector2(-16f, -14f), new Vector2(154f, 48f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             statusText = MakeText("Status", statusPanel.transform, new Vector2(-12f, -8f), new Vector2(130f, 34f), TextAnchor.UpperRight, 13);
             MakeMinimap();
 
             planetPanel = MakePanel("Planet Controls", new Vector2(0f, 18f), new Vector2(760f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
-            MakeButton("Crafting", planetPanel.transform, new Vector2(-285f, 27f), new Vector2(128f, 34f), ToggleCrafting);
-            MakeButton("Market", planetPanel.transform, new Vector2(-145f, 27f), new Vector2(118f, 34f), ToggleMarket);
-            MakeButton("Quest Board", planetPanel.transform, new Vector2(0f, 27f), new Vector2(138f, 34f), ToggleQuests);
-            MakeButton("Shipyard", planetPanel.transform, new Vector2(145f, 27f), new Vector2(126f, 34f), ToggleShipyard);
-            MakeButton("Fly To Space", planetPanel.transform, new Vector2(292f, 27f), new Vector2(146f, 34f), GameManager.Instance.EnterSpaceMode);
+            MakeButton("Colony", planetPanel.transform, new Vector2(-292f, 27f), new Vector2(112f, 34f), HidePopups);
+            MakeButton("Auction", planetPanel.transform, new Vector2(-164f, 27f), new Vector2(120f, 34f), ToggleMarket);
+            MakeButton("Shipyard", planetPanel.transform, new Vector2(-28f, 27f), new Vector2(126f, 34f), ToggleShipyard);
+            MakeButton("Tasks", planetPanel.transform, new Vector2(108f, 27f), new Vector2(108f, 34f), ToggleQuests);
+            MakeButton("Take off", planetPanel.transform, new Vector2(272f, 27f), new Vector2(146f, 34f), GameManager.Instance.EnterSpaceMode);
 
             spacePanel = MakePanel("Space Controls", new Vector2(0f, 18f), new Vector2(420f, 30f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
             spaceText = MakeText("Space HUD", spacePanel.transform, new Vector2(0f, -6f), new Vector2(404f, 20f), TextAnchor.MiddleCenter, 11);
@@ -75,11 +75,10 @@ namespace StarAge3D
                 .text = "While you were away your colonies produced resources";
 
             rightRailPanel = MakePanel("Space Right Rail", new Vector2(-14f, -34f), new Vector2(58f, 324f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f));
-            MakeButton("Map", rightRailPanel.transform, new Vector2(0f, 116f), new Vector2(44f, 36f), ToggleGalaxyMap);
-            MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 62f), new Vector2(44f, 36f), GameManager.Instance.EnterPlanetMode);
-            MakeButton("Bag", rightRailPanel.transform, new Vector2(0f, 8f), new Vector2(44f, 36f), ToggleMarket);
-            MakeButton("Fix", rightRailPanel.transform, new Vector2(0f, -46f), new Vector2(44f, 36f), TryRepairShip);
-            MakeButton("Go", rightRailPanel.transform, new Vector2(0f, -100f), new Vector2(44f, 36f), TryBoostShip);
+            MakeButton("Galaxy", rightRailPanel.transform, new Vector2(0f, 116f), new Vector2(50f, 36f), ToggleGalaxyMap);
+            MakeButton("Home", rightRailPanel.transform, new Vector2(0f, 62f), new Vector2(50f, 36f), GameManager.Instance.EnterPlanetMode);
+            MakeButton("Kit", rightRailPanel.transform, new Vector2(0f, 8f), new Vector2(50f, 36f), TryRepairShip);
+            MakeButton("Boost", rightRailPanel.transform, new Vector2(0f, -46f), new Vector2(50f, 36f), TryBoostShip);
 
             detailPanel = MakePanel("Building Details", Vector2.zero, new Vector2(540f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             craftingPanel = MakePanel("Crafting", Vector2.zero, new Vector2(520f, 360f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
@@ -128,12 +127,14 @@ namespace StarAge3D
         {
             if (resourceText == null || GameManager.Instance == null || GameManager.Instance.Resources == null) return;
             ResourceWallet wallet = GameManager.Instance.Resources.Wallet;
-            resourceText.text = $"Stone {wallet.stone}   U {wallet.uranium}   Ice {wallet.ice}   Metal {wallet.metal}   Fuel {wallet.fuel}   Coins {wallet.coins}";
             StarAgeSaveData data = GameManager.Instance.Save.Data;
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
             RefreshTopBars(data, ship);
-            statusText.text = $"{wallet.coins:n0} credits\nColony";
+            int cargo = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoUsed() : 0;
+            int cargoMax = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoCapacity() : ship.cargo;
+            resourceText.text = $"Cargo {cargo}/{cargoMax}   Stone {wallet.stone}  Ice {wallet.ice}  U {wallet.uranium}";
+            statusText.text = $"{wallet.coins:n0} credits\nNovara";
             if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"{wallet.coins:n0} credits\nFomen System";
             if (minimapPanel != null) minimapPanel.SetActive(GameManager.Instance.Mode == GameMode.Space);
             if (GameManager.Instance.Mode == GameMode.Space) DrawMinimap();
@@ -252,7 +253,7 @@ namespace StarAge3D
                 {
                     BuildingType buildType = buildable[i];
                     BuildingDefinition buildDef = BuildingManager.Definition(buildType);
-                    string label = $"{buildDef.label}  Cost S{buildDef.stoneCost} U{buildDef.uraniumCost} I{buildDef.iceCost} M{buildDef.metalCost}";
+                    string label = $"{buildDef.label} - {buildDef.coinCost} credits";
                     MakeButton(label, detailPanel.transform, new Vector2(0f, y), new Vector2(450f, 30f), () =>
                     {
                         GameManager.Instance.Buildings.Build(slot.Index, buildType);
@@ -280,8 +281,8 @@ namespace StarAge3D
             craftingPanel.SetActive(open);
             if (!open) return;
             Clear(craftingPanel.transform);
-            AddTitle(craftingPanel, "Crafting");
-            AddText(craftingPanel, "Craft advanced items instantly for this MVP. Factories automate the same recipes over time.", new Vector2(0f, 110f), new Vector2(440f, 60f));
+            AddTitle(craftingPanel, "Colony Crafting");
+            AddText(craftingPanel, "Factories automate these Starkus recipes over time. Use this panel for instant MVP crafting.", new Vector2(0f, 110f), new Vector2(440f, 60f));
             MakeButton("Craft Metal: 2 stone -> 1 metal", craftingPanel.transform, new Vector2(0f, 45f), new Vector2(360f, 34f), () => { GameManager.Instance.Crafting.CraftMetal(); ToggleCrafting(); ToggleCrafting(); });
             MakeButton("Craft Fuel: 2 uranium + 1 ice -> 1 fuel", craftingPanel.transform, new Vector2(0f, 5f), new Vector2(360f, 34f), () => { GameManager.Instance.Crafting.CraftFuel(); ToggleCrafting(); ToggleCrafting(); });
             MakeButton("Craft Repair Kit: 1 metal + 1 uranium", craftingPanel.transform, new Vector2(0f, -35f), new Vector2(360f, 34f), () => { GameManager.Instance.Crafting.CraftRepairKit(); ToggleCrafting(); ToggleCrafting(); });
@@ -296,7 +297,7 @@ namespace StarAge3D
             marketPanel.SetActive(open);
             if (!open) return;
             Clear(marketPanel.transform);
-            AddTitle(marketPanel, "Market / Auction");
+            AddTitle(marketPanel, "Auction - sell from cargo hold");
             AddText(marketPanel, "Sell prices: Ice 2, Stone 3, Uranium 5, Metal 15, Fuel 20, Repair Kit 50, Booster 50.", new Vector2(0f, 135f), new Vector2(450f, 70f));
             ResourceType[] types = { ResourceType.Ice, ResourceType.Stone, ResourceType.Uranium, ResourceType.Metal, ResourceType.Fuel, ResourceType.RepairKits, ResourceType.Boosters };
             int y = 70;
@@ -317,7 +318,7 @@ namespace StarAge3D
             questPanel.SetActive(open);
             if (!open) return;
             Clear(questPanel.transform);
-            AddTitle(questPanel, "Quest Board");
+            AddTitle(questPanel, "Active missions / Mission board");
             int y = 160;
             foreach (QuestSave quest in GameManager.Instance.Quests.Quests)
             {
@@ -343,14 +344,13 @@ namespace StarAge3D
             shipyardPanel.SetActive(open);
             if (!open) return;
             Clear(shipyardPanel.transform);
-            AddTitle(shipyardPanel, "Shop / Shipyard");
-            MakeButton("Buy Scout - Free", shipyardPanel.transform, new Vector2(0f, 125f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("scout"); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Buy Fighter - 1200 coins", shipyardPanel.transform, new Vector2(0f, 85f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("fighter"); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Buy Destroyer - 3500 coins", shipyardPanel.transform, new Vector2(0f, 45f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("destroyer"); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Buy Heavy Laser - 900 coins", shipyardPanel.transform, new Vector2(0f, 5f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyWeapon("heavy"); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Engine Upgrade +2 speed - 650 coins", shipyardPanel.transform, new Vector2(0f, -35f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyEngine(); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Cargo Module +20 cargo - 700 coins", shipyardPanel.transform, new Vector2(0f, -75f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyCargoModule(); ToggleShipyard(); ToggleShipyard(); });
-            MakeButton("Armor Module +50 HP - 800 coins", shipyardPanel.transform, new Vector2(0f, -115f), new Vector2(360f, 34f), () => { GameManager.Instance.Shipyard.BuyArmorModule(); ToggleShipyard(); ToggleShipyard(); });
+            AddTitle(shipyardPanel, "Shipyard");
+            MakeButton("Scout - HP 100 / Speed 26 / Cargo 200 - Current", shipyardPanel.transform, new Vector2(0f, 125f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("scout"); ToggleShipyard(); ToggleShipyard(); });
+            MakeButton("Fighter - HP 200 / Speed 20 / Cargo 250 - 5000 credits", shipyardPanel.transform, new Vector2(0f, 85f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("fighter"); ToggleShipyard(); ToggleShipyard(); });
+            MakeButton("Destroyer - HP 400 / Speed 14 / Cargo 300 - 15000 credits", shipyardPanel.transform, new Vector2(0f, 45f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyShip("destroyer"); ToggleShipyard(); ToggleShipyard(); });
+            MakeButton("Basic Laser - Damage 10 / Range 20 / 1.0s", shipyardPanel.transform, new Vector2(0f, 5f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyWeapon("laser"); ToggleShipyard(); ToggleShipyard(); });
+            MakeButton("Improved Laser - Damage 15 / Range 24 / 2000 credits", shipyardPanel.transform, new Vector2(0f, -35f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyWeapon("laser2"); ToggleShipyard(); ToggleShipyard(); });
+            MakeButton("Improved Engine - Speed x1.25 - 1500 credits", shipyardPanel.transform, new Vector2(0f, -75f), new Vector2(420f, 34f), () => { GameManager.Instance.Shipyard.BuyEngine(); ToggleShipyard(); ToggleShipyard(); });
             MakeButton("Close", shipyardPanel.transform, new Vector2(0f, -185f), new Vector2(180f, 34f), HidePopups);
         }
 
@@ -362,22 +362,26 @@ namespace StarAge3D
             if (!open) return;
             Clear(galaxyPanel.transform);
             AddTitle(galaxyPanel, "Galaxy Map");
-            AddText(galaxyPanel, "Route network prototype. Orion is playable now; nearby systems are visual targets like the Starkus map.", new Vector2(-310f, 188f), new Vector2(620f, 48f));
+            AddText(galaxyPanel, "Fomen is your current home system. Bellum is reachable; Tais, Sparta, Pioner, and Orion unlock by level.", new Vector2(-310f, 188f), new Vector2(620f, 48f));
 
-            Vector2 orion = new Vector2(0f, 58f);
-            Vector2 aurora = new Vector2(-230f, 120f);
-            Vector2 asgard = new Vector2(220f, 132f);
-            Vector2 sparta = new Vector2(-210f, -92f);
-            Vector2 frontier = new Vector2(240f, -118f);
-            AddGalaxyConnection(orion, aurora);
-            AddGalaxyConnection(orion, asgard);
-            AddGalaxyConnection(orion, sparta);
-            AddGalaxyConnection(orion, frontier);
-            AddGalaxySystem("Orion", "Home star", orion, new Color(1f, 0.84f, 0.25f), true);
-            AddGalaxySystem("Aurora", "Ice fields", aurora, new Color(0.32f, 0.82f, 1f), false);
-            AddGalaxySystem("Asgard", "Trade hub", asgard, new Color(0.62f, 1f, 0.62f), false);
-            AddGalaxySystem("Sparta", "Pirate danger", sparta, new Color(1f, 0.22f, 0.18f), false);
-            AddGalaxySystem("Frontier", "Asteroid belt", frontier, new Color(0.82f, 0.68f, 1f), false);
+            Vector2 fomen = new Vector2(20f, -56f);
+            Vector2 bellum = new Vector2(-140f, 30f);
+            Vector2 tais = new Vector2(170f, 6f);
+            Vector2 sparta = new Vector2(-78f, 142f);
+            Vector2 pioner = new Vector2(286f, 96f);
+            Vector2 orion = new Vector2(-292f, 72f);
+            AddGalaxyConnection(fomen, bellum);
+            AddGalaxyConnection(fomen, tais);
+            AddGalaxyConnection(bellum, sparta);
+            AddGalaxyConnection(sparta, orion);
+            AddGalaxyConnection(tais, pioner);
+            AddGalaxyConnection(orion, pioner);
+            AddGalaxySystem("Fomen", "Home - you are here", fomen, new Color(0.35f, 1f, 0.55f), true);
+            AddGalaxySystem("Bellum", "Reachable green zone", bellum, new Color(0.35f, 1f, 0.55f), false);
+            AddGalaxySystem("Tais", "Locked level 2", tais, new Color(1f, 0.78f, 0.28f), false);
+            AddGalaxySystem("Sparta", "Locked level 3", sparta, new Color(1f, 0.55f, 0.25f), false);
+            AddGalaxySystem("Pioner", "Locked level 4", pioner, new Color(1f, 0.24f, 0.22f), false);
+            AddGalaxySystem("Orion", "Locked level 5", orion, new Color(1f, 0.2f, 0.18f), false);
             AddText(galaxyPanel, "Tip: use the space view to mine asteroids, fight pirates, collect loot, and return home to upgrade the colony.", new Vector2(-310f, -204f), new Vector2(620f, 44f));
             MakeButton("Close", galaxyPanel.transform, new Vector2(0f, -236f), new Vector2(180f, 34f), HidePopups);
         }
@@ -432,12 +436,28 @@ namespace StarAge3D
             ShipController player = GameManager.Instance.Space.PlayerShip;
             int hp = player != null ? player.Hp : data.shipHp;
             int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
-            int cargo = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoUsed() : 0;
-            int cargoMax = GameManager.Instance.Space != null ? GameManager.Instance.Space.CargoCapacity() : ship.cargo + data.cargoModules * 20;
             SetBar(hpBarFill, hp, maxHp, 216f);
-            SetBar(cargoBarFill, cargo, cargoMax, 216f);
+            int nextXp = NextXpThreshold(data.level);
+            int prevXp = PreviousXpThreshold(data.level);
+            int levelProgress = Mathf.Max(0, data.xp - prevXp);
+            int levelRange = Mathf.Max(1, nextXp - prevXp);
+            SetBar(cargoBarFill, levelProgress, levelRange, 216f);
             if (hpBarText != null) hpBarText.text = $"{hp}/{maxHp}";
-            if (cargoBarText != null) cargoBarText.text = $"Cargo {cargo}/{cargoMax}";
+            if (cargoBarText != null) cargoBarText.text = $"Lv {data.level} - {data.xp} XP";
+        }
+
+        int PreviousXpThreshold(int level)
+        {
+            int[] thresholds = { 0, 100, 300, 700, 1500, 3000, 6000 };
+            int index = Mathf.Clamp(level - 1, 0, thresholds.Length - 1);
+            return thresholds[index];
+        }
+
+        int NextXpThreshold(int level)
+        {
+            int[] thresholds = { 0, 100, 300, 700, 1500, 3000, 6000 };
+            int index = Mathf.Clamp(level, 1, thresholds.Length - 1);
+            return thresholds[index];
         }
 
         void SetBar(RectTransform fill, int value, int max, float width)

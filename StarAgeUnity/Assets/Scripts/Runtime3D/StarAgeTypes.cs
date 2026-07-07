@@ -17,7 +17,7 @@ namespace StarAge3D
         public int ice;
         public int metal;
         public int fuel;
-        public int coins = 300;
+        public int coins = 25000;
         public int repairKits;
         public int boosters;
 
@@ -94,12 +94,34 @@ namespace StarAge3D
         public int cargoModules;
         public int armorModules;
         public int shipHp = 100;
+        public int xp;
+        public int level = 1;
 
         public void EnsureDefaults()
         {
             if (resources == null) resources = new ResourceWallet();
             if (buildings == null) buildings = new List<BuildingSave>();
             while (buildings.Count < 9) buildings.Add(new BuildingSave());
+            bool emptyColony = true;
+            for (int i = 0; i < buildings.Count; i++)
+            {
+                if (buildings[i].type != BuildingType.Empty)
+                {
+                    emptyColony = false;
+                    break;
+                }
+            }
+
+            if (emptyColony)
+            {
+                buildings[0].type = BuildingType.StoneQuarry;
+                buildings[0].stored = 5;
+                buildings[1].type = BuildingType.IceWell;
+                buildings[1].stored = 5;
+                resources.stone = Mathf.Max(resources.stone, 5);
+                resources.ice = Mathf.Max(resources.ice, 5);
+                resources.coins = Mathf.Max(resources.coins, 25000);
+            }
             if (quests == null || quests.Count == 0)
             {
                 quests = new List<QuestSave>
@@ -113,6 +135,7 @@ namespace StarAge3D
             if (string.IsNullOrEmpty(shipId)) shipId = "scout";
             if (string.IsNullOrEmpty(weaponId)) weaponId = "laser";
             if (shipHp <= 0) shipHp = ShipStats.For(shipId).hp + armorModules * 50;
+            if (level <= 0) level = 1;
         }
     }
 
@@ -127,8 +150,9 @@ namespace StarAge3D
         public int uraniumCost;
         public int iceCost;
         public int metalCost;
+        public int coinCost;
 
-        public BuildingDefinition(string label, string description, ResourceType output, float seconds, int maxStorage, int stoneCost, int uraniumCost, int iceCost, int metalCost)
+        public BuildingDefinition(string label, string description, ResourceType output, float seconds, int maxStorage, int stoneCost, int uraniumCost, int iceCost, int metalCost, int coinCost = 0)
         {
             this.label = label;
             this.description = description;
@@ -139,6 +163,7 @@ namespace StarAge3D
             this.uraniumCost = uraniumCost;
             this.iceCost = iceCost;
             this.metalCost = metalCost;
+            this.coinCost = coinCost;
         }
     }
 
@@ -155,9 +180,9 @@ namespace StarAge3D
 
         public static ShipStats For(string id)
         {
-            if (id == "fighter") return new ShipStats { id = "fighter", label = "Fighter", hp = 180, speed = 10f, cargo = 30, weaponSlots = 2, moduleSlots = 2, cost = 1200 };
-            if (id == "destroyer") return new ShipStats { id = "destroyer", label = "Destroyer", hp = 350, speed = 6f, cargo = 60, weaponSlots = 3, moduleSlots = 3, cost = 3500 };
-            return new ShipStats { id = "scout", label = "Scout", hp = 100, speed = 8f, cargo = 20, weaponSlots = 1, moduleSlots = 1, cost = 0 };
+            if (id == "fighter") return new ShipStats { id = "fighter", label = "Fighter", hp = 200, speed = 20f, cargo = 250, weaponSlots = 2, moduleSlots = 2, cost = 5000 };
+            if (id == "destroyer") return new ShipStats { id = "destroyer", label = "Destroyer", hp = 400, speed = 14f, cargo = 300, weaponSlots = 3, moduleSlots = 3, cost = 15000 };
+            return new ShipStats { id = "scout", label = "Scout", hp = 100, speed = 26f, cargo = 200, weaponSlots = 1, moduleSlots = 1, cost = 0 };
         }
     }
 
@@ -166,13 +191,15 @@ namespace StarAge3D
         public string id;
         public string label;
         public int damage;
+        public int range;
         public float fireRate;
         public int cost;
+        public string color;
 
         public static WeaponStats For(string id)
         {
-            if (id == "heavy") return new WeaponStats { id = "heavy", label = "Heavy Laser", damage = 25, fireRate = 1.2f, cost = 900 };
-            return new WeaponStats { id = "laser", label = "Laser Cannon", damage = 10, fireRate = 0.5f, cost = 0 };
+            if (id == "laser2" || id == "heavy") return new WeaponStats { id = "laser2", label = "Improved Laser", damage = 15, range = 24, fireRate = 0.83f, cost = 2000, color = "#ff9d2e" };
+            return new WeaponStats { id = "laser", label = "Basic Laser", damage = 10, range = 20, fireRate = 1f, cost = 0, color = "#ff4d4d" };
         }
     }
 }

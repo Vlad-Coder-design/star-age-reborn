@@ -34,15 +34,15 @@ namespace StarAge3D
         {
             switch (type)
             {
-                case BuildingType.StoneQuarry: return new BuildingDefinition("Stone Quarry", "Produces 1 stone every 15 minutes. Max 5.", ResourceType.Stone, 15f, 5, 0, 0, 0, 0);
-                case BuildingType.UraniumMine: return new BuildingDefinition("Uranium Mine", "Produces 1 uranium every 20 minutes. Max 5.", ResourceType.Uranium, 20f, 5, 4, 0, 0, 0);
-                case BuildingType.IceWell: return new BuildingDefinition("Ice Mine", "Produces 1 ice every 5 minutes. Max 5.", ResourceType.Ice, 5f, 5, 2, 0, 0, 0);
-                case BuildingType.FuelFactory: return new BuildingDefinition("Fuel Factory", "Converts 2 uranium + 1 ice into 1 fuel.", ResourceType.Fuel, 30f, 4, 6, 2, 2, 0);
-                case BuildingType.MetalFactory: return new BuildingDefinition("Metal Factory", "Converts 2 stone into 1 metal.", ResourceType.Metal, 30f, 5, 8, 0, 0, 0);
-                case BuildingType.RepairKitFactory: return new BuildingDefinition("Repair Kit Factory", "Converts 1 metal + 1 uranium into repair kits.", ResourceType.RepairKits, 30f, 4, 10, 2, 0, 2);
-                case BuildingType.BoosterFactory: return new BuildingDefinition("Booster Factory", "Converts 1 fuel + 1 ice into speed boosters.", ResourceType.Boosters, 30f, 4, 10, 0, 3, 0);
-                case BuildingType.Warehouse: return new BuildingDefinition("Warehouse", "Inventory capacity: 300 slots.", ResourceType.Stone, 1f, 0, 5, 0, 0, 0);
-                case BuildingType.Market: return new BuildingDefinition("Market", "Sell resources and items for coins.", ResourceType.Coins, 1f, 0, 5, 0, 0, 0);
+                case BuildingType.StoneQuarry: return new BuildingDefinition("Stone Quarry", "Mines 1 stone every 15 min. Holds 5.", ResourceType.Stone, 15f, 5, 0, 0, 0, 0, 100);
+                case BuildingType.UraniumMine: return new BuildingDefinition("Uranium Quarry", "Mines 1 uranium every 20 min. Holds 5. Military planets only.", ResourceType.Uranium, 20f, 5, 0, 0, 0, 0, 250);
+                case BuildingType.IceWell: return new BuildingDefinition("Ice Quarry", "Extracts 1 ice every 5 min. Holds 5.", ResourceType.Ice, 5f, 5, 0, 0, 0, 0, 100);
+                case BuildingType.FuelFactory: return new BuildingDefinition("Fuel Plant", "2 uranium + 1 ice -> 1 fuel every 30 min. Holds 4.", ResourceType.Fuel, 30f, 4, 0, 0, 0, 0, 500);
+                case BuildingType.MetalFactory: return new BuildingDefinition("Metal Plant", "2 stone -> 1 metal every 30 min. Holds 5.", ResourceType.Metal, 30f, 5, 0, 0, 0, 0, 400);
+                case BuildingType.RepairKitFactory: return new BuildingDefinition("Repair Kit Workshop", "1 metal + 1 uranium -> 1 repair kit (+20 HP in space) every 30 min.", ResourceType.RepairKits, 30f, 3, 0, 0, 0, 0, 800);
+                case BuildingType.BoosterFactory: return new BuildingDefinition("Accelerator Workshop", "1 fuel + 1 ice -> 1 accelerator (+speed 30 s) every 30 min.", ResourceType.Boosters, 30f, 3, 0, 0, 0, 0, 800);
+                case BuildingType.Warehouse: return new BuildingDefinition("Warehouse", "Stores collected resources. +300 capacity.", ResourceType.Stone, 1f, 0, 0, 0, 0, 0, 300);
+                case BuildingType.Market: return new BuildingDefinition("Auction", "Sell goods for credits directly from the colony.", ResourceType.Coins, 1f, 0, 0, 0, 0, 0, 500);
                 default: return new BuildingDefinition("Empty Slot", "Choose a building to construct.", ResourceType.Stone, 1f, 0, 0, 0, 0, 0);
             }
         }
@@ -55,7 +55,9 @@ namespace StarAge3D
 
             BuildingDefinition def = Definition(type);
             ResourceWallet wallet = GameManager.Instance.Resources.Wallet;
+            if (wallet.coins < def.coinCost) return false;
             if (wallet.stone < def.stoneCost || wallet.uranium < def.uraniumCost || wallet.ice < def.iceCost || wallet.metal < def.metalCost) return false;
+            wallet.coins -= def.coinCost;
             wallet.stone -= def.stoneCost;
             wallet.uranium -= def.uraniumCost;
             wallet.ice -= def.iceCost;

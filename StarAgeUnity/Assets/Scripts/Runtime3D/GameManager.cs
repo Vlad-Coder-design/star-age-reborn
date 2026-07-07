@@ -99,6 +99,20 @@ namespace StarAge3D
             UI.Refresh();
         }
 
+        public void AddXp(int amount)
+        {
+            StarAgeSaveData data = Save.Data;
+            data.xp += Mathf.Max(0, amount);
+            int[] thresholds = { 0, 100, 300, 700, 1500, 3000, 6000 };
+            int newLevel = 1;
+            for (int i = 1; i < thresholds.Length; i++)
+            {
+                if (data.xp >= thresholds[i]) newLevel = i + 1;
+            }
+            data.level = Mathf.Max(data.level, newLevel);
+            UI.Refresh();
+        }
+
         public void EnterPlanetMode()
         {
             Mode = GameMode.Planet;
