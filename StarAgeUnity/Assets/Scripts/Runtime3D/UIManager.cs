@@ -10,6 +10,8 @@ namespace StarAge3D
         Text resourceText;
         Text statusText;
         Text spaceText;
+        RawImage minimapImage;
+        Texture2D minimapTexture;
         GameObject planetPanel;
         GameObject detailPanel;
         GameObject craftingPanel;
@@ -46,6 +48,7 @@ namespace StarAge3D
             resourceText = MakeText("Resources", resourcePanel.transform, new Vector2(14f, -10f), new Vector2(292f, 96f), TextAnchor.UpperLeft, 14);
             var statusPanel = MakePanel("Status HUD", new Vector2(-16f, -16f), new Vector2(360f, 92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             statusText = MakeText("Status", statusPanel.transform, new Vector2(-14f, -10f), new Vector2(332f, 72f), TextAnchor.UpperRight, 13);
+            MakeMinimap();
 
             planetPanel = MakePanel("Planet Controls", new Vector2(0f, 18f), new Vector2(760f, 54f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f));
             MakeButton("Crafting", planetPanel.transform, new Vector2(-285f, 27f), new Vector2(128f, 34f), ToggleCrafting);
@@ -105,6 +108,9 @@ namespace StarAge3D
             ShipStats ship = ShipStats.For(data.shipId);
             WeaponStats weapon = WeaponStats.For(data.weaponId);
             statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD + mouse, LMB fire";
+            if (GameManager.Instance.Mode == GameMode.Space) statusText.text = $"{GameManager.Instance.Mode} View\n{ship.label} / {weapon.label}\nWASD or RMB fly, LMB/Space fire, Shift boost";
+            if (minimapImage != null) minimapImage.gameObject.SetActive(GameManager.Instance.Mode == GameMode.Space);
+            if (GameManager.Instance.Mode == GameMode.Space) DrawMinimap();
 
             if (spaceText != null && spaceText.gameObject.activeSelf)
             {
@@ -113,6 +119,99 @@ namespace StarAge3D
                 int maxHp = player != null ? player.MaxHp : ship.hp + data.armorModules * 50;
                 spaceText.text = $"HP: {hp}/{maxHp}\nCargo: {GameManager.Instance.Space.CargoUsed()}/{GameManager.Instance.Space.CargoCapacity()}\nCoins: {GameManager.Instance.Resources.Wallet.coins}\nActive quests update automatically.";
             }
+        }
+
+        void MakeMinimap()
+        {
+            var panel = MakePanel("Reference Minimap", new Vector2(-16f, -116f), new Vector2(166f, 166f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            minimapTexture = new Texture2D(148, 148, TextureFormat.RGBA32, false);
+            minimapTexture.filterMode = FilterMode.Point;
+            var imageObject = new GameObject("Minimap Image", typeof(RawImage));
+            imageObject.transform.SetParent(panel.transform, false);
+            minimapImage = imageObject.GetComponent<RawImage>();
+            minimapImage.texture = minimapTexture;
+            RectTransform rect = minimapImage.rectTransform;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(148f, 148f);
+        }
+
+        void DrawMinimap()
+        {
+            if (minimapTexture == null || GameManager.Instance.Space == null) return;
+            int size = minimapTexture.width;
+            Color bg = new Color(0.015f, 0.035f, 0.075f, 0.92f);
+            Color[] pixels = minimapTexture.GetPixels();
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = bg;
+            minimapTexture.SetPixels(pixels);
+
+            int center = size / 2;
+            DrawCircle(center, center, 24, new Color(0.2f, 0.42f, 0.9f, 0.55f));
+            DrawCircle(center, center, 42, new Color(0.2f, 0.42f, 0.9f, 0.45f));
+            DrawCircle(center, center, 62, new Color(0.2f, 0.42f, 0.9f, 0.35f));
+            DrawDot(center, center, 4, new Color(1f, 0.86f, 0.2f));
+
+            DrawTransforms(GameManager.Instance.Space.MapPlanets, new Color(0.35f, 0.72f, 1f), 3);
+            DrawTransforms(GameManager.Instance.Space.MapResources, new Color(0.75f, 0.78f, 0.72f), 1);
+            DrawTransforms(GameManager.Instance.Space.MapEnemies, new Color(1f, 0.25f, 0.25f), 2);
+
+            ShipController player = GameManager.Instance.Space.PlayerShip;
+            if (player != null)
+            {
+                Vector2Int p = WorldToMap(player.transform.position);
+                DrawDot(p.x, p.y, 3, new Color(0.35f, 1f, 0.55f));
+            }
+
+            minimapTexture.Apply(false);
+        }
+
+        void DrawTransforms(IReadOnlyList<Transform> transforms, Color color, int radius)
+        {
+            foreach (Transform item in transforms)
+            {
+                if (item == null || !item.gameObject.activeInHierarchy) continue;
+                Vector2Int p = WorldToMap(item.position);
+                DrawDot(p.x, p.y, radius, color);
+            }
+        }
+
+        Vector2Int WorldToMap(Vector3 world)
+        {
+            int size = minimapTexture.width;
+            float scale = size / 150f;
+            int x = Mathf.RoundToInt(size * 0.5f + world.x * scale);
+            int y = Mathf.RoundToInt(size * 0.5f + world.z * scale);
+            return new Vector2Int(x, y);
+        }
+
+        void DrawCircle(int cx, int cy, int radius, Color color)
+        {
+            for (int i = 0; i < 96; i++)
+            {
+                float a = i / 96f * Mathf.PI * 2f;
+                int x = Mathf.RoundToInt(cx + Mathf.Cos(a) * radius);
+                int y = Mathf.RoundToInt(cy + Mathf.Sin(a) * radius);
+                SetPixel(x, y, color);
+            }
+        }
+
+        void DrawDot(int cx, int cy, int radius, Color color)
+        {
+            for (int y = -radius; y <= radius; y++)
+            {
+                for (int x = -radius; x <= radius; x++)
+                {
+                    if (x * x + y * y <= radius * radius) SetPixel(cx + x, cy + y, color);
+                }
+            }
+        }
+
+        void SetPixel(int x, int y, Color color)
+        {
+            if (x < 0 || y < 0 || x >= minimapTexture.width || y >= minimapTexture.height) return;
+            minimapTexture.SetPixel(x, y, color);
         }
 
         public void OpenBuildingDetails(BuildingSlot slot)

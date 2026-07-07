@@ -11,6 +11,8 @@ namespace StarAge3D
         float fireTimer;
         float boosterTimer;
         Vector3 velocity;
+        Vector3 moveTarget;
+        bool hasMoveTarget;
 
         public void Init(bool enemy)
         {
@@ -35,13 +37,41 @@ namespace StarAge3D
 
             Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
             input = Vector3.ClampMagnitude(input, 1f);
-            velocity = Vector3.Lerp(velocity, input * speed, 8f * Time.deltaTime);
+
+            if (input.sqrMagnitude > 0.01f)
+            {
+                hasMoveTarget = false;
+                velocity = Vector3.Lerp(velocity, input * speed, 8f * Time.deltaTime);
+            }
+            else if (hasMoveTarget)
+            {
+                Vector3 toTarget = moveTarget - transform.position;
+                toTarget.y = 0f;
+                float distance = toTarget.magnitude;
+                if (distance < 0.45f)
+                {
+                    hasMoveTarget = false;
+                    velocity = Vector3.Lerp(velocity, Vector3.zero, 7f * Time.deltaTime);
+                }
+                else
+                {
+                    float approachSpeed = Mathf.Min(speed, Mathf.Max(1.4f, distance * 1.8f));
+                    velocity = Vector3.Lerp(velocity, toTarget.normalized * approachSpeed, 4.8f * Time.deltaTime);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(toTarget.normalized, Vector3.up), 8f * Time.deltaTime);
+                }
+            }
+            else
+            {
+                velocity = Vector3.Lerp(velocity, Vector3.zero, 4f * Time.deltaTime);
+            }
+
             transform.position += velocity * Time.deltaTime;
 
             AimAtMouse();
             fireTimer -= Time.deltaTime;
-            if (Input.GetMouseButton(0)) TryShoot();
-            if (Input.GetKeyDown(KeyCode.Space)) UseBooster();
+            if (Input.GetMouseButtonDown(1)) SetMoveTargetFromMouse();
+            if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.Space)) TryShoot();
+            if (Input.GetKeyDown(KeyCode.LeftShift)) UseBooster();
             if (Input.GetKeyDown(KeyCode.R)) UseRepairKit();
         }
 
@@ -78,6 +108,17 @@ namespace StarAge3D
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized, Vector3.up), 12f * Time.deltaTime);
             }
+        }
+
+        void SetMoveTargetFromMouse()
+        {
+            Ray ray = GameManager.Instance.MainCamera.ScreenPointToRay(Input.mousePosition);
+            Plane plane = new Plane(Vector3.up, Vector3.zero);
+            float enter;
+            if (!plane.Raycast(ray, out enter)) return;
+            moveTarget = ray.GetPoint(enter);
+            moveTarget.y = 0f;
+            hasMoveTarget = true;
         }
 
         void TryShoot()
@@ -120,7 +161,7 @@ namespace StarAge3D
                 else
                 {
                     Hp = MaxHp;
-                    transform.position = new Vector3(0f, 0f, -8f);
+                    transform.position = new Vector3(0f, 0f, 36f);
                     GameManager.Instance.Save.Data.shipHp = Hp;
                 }
             }
