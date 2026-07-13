@@ -281,13 +281,22 @@ namespace StarAge3D
 
         void AddPlanetRing(string label, Vector3 position, float radius, Color color)
         {
-            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            ring.name = label + " Orbital Disc";
+            var ring = new GameObject(label + " Thin Orbital Ring");
             ring.transform.SetParent(root.transform);
             ring.transform.position = position;
             ring.transform.rotation = Quaternion.Euler(8f, 0f, 18f);
-            ring.transform.localScale = new Vector3(radius * 1.55f, 0.012f, radius * 1.55f);
-            ring.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(color.r, color.g, color.b, 0.18f), true);
+            var line = ring.AddComponent<LineRenderer>();
+            line.loop = true;
+            line.positionCount = 96;
+            line.useWorldSpace = false;
+            line.widthMultiplier = 0.045f;
+            line.material = RuntimeMaterial.Create(new Color(color.r, color.g, color.b, 0.42f), true);
+            float ringRadius = radius * 1.05f;
+            for (int i = 0; i < line.positionCount; i++)
+            {
+                float angle = i / (float)line.positionCount * Mathf.PI * 2f;
+                line.SetPosition(i, new Vector3(Mathf.Cos(angle) * ringRadius, 0f, Mathf.Sin(angle) * ringRadius));
+            }
         }
 
         void BuildStarfield()
@@ -451,7 +460,6 @@ namespace StarAge3D
             AddBox(rootShip.transform, "Starboard Hull Panel", new Vector3(0.22f, 0.17f, -0.1f), new Vector3(0.2f, 0.025f, 0.86f), darkHull, Quaternion.Euler(0f, 6f, 0f));
             AddBox(rootShip.transform, "Rear Reactor Glow", new Vector3(0f, 0.03f, -1.72f), new Vector3(0.22f, 0.18f, 0.08f), trim, Quaternion.identity, true);
             AddBox(rootShip.transform, "Ventral Sensor Blade", new Vector3(0f, -0.38f, 0.12f), new Vector3(0.08f, 0.5f, 0.42f), darkHull, Quaternion.Euler(0f, 0f, 0f));
-            AddShipShieldOutline(rootShip.transform, trim);
 
             var collider = rootShip.AddComponent<SphereCollider>();
             collider.radius = 1.05f;
@@ -466,24 +474,13 @@ namespace StarAge3D
             flame.transform.SetParent(parent);
             flame.transform.localPosition = new Vector3(side * 0.42f, -0.04f, -1.98f);
             flame.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
-            flame.transform.localScale = new Vector3(0.24f, 0.72f, 0.24f);
-            flame.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(trim.r, trim.g, trim.b, 0.68f), true);
+            flame.transform.localScale = new Vector3(0.12f, 0.34f, 0.12f);
+            flame.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(trim.r, trim.g, trim.b, 0.52f), true);
             var light = flame.AddComponent<Light>();
             light.type = LightType.Point;
-            light.range = 3.8f;
-            light.intensity = 1.4f;
+            light.range = 2.6f;
+            light.intensity = 0.9f;
             light.color = trim;
-        }
-
-        void AddShipShieldOutline(Transform parent, Color trim)
-        {
-            var ring = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            ring.name = "Subtle Shield Ring";
-            ring.transform.SetParent(parent);
-            ring.transform.localPosition = new Vector3(0f, 0.02f, -0.12f);
-            ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            ring.transform.localScale = new Vector3(1.75f, 1.75f, 0.035f);
-            ring.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(trim.r, trim.g, trim.b, 0.16f), true);
         }
 
         void AddNameplate(Transform parent, string label, ShipController controller, Color color)

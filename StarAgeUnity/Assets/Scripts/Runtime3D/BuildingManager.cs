@@ -88,13 +88,6 @@ namespace StarAge3D
             surface.transform.localScale = new Vector3(9.8f, 0.42f, 9.8f);
             surface.GetComponent<Renderer>().material = Mat(new Color(0.46f, 0.22f, 0.14f));
 
-            var atmosphere = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            atmosphere.name = "Colony Heat Haze Atmosphere";
-            atmosphere.transform.SetParent(root.transform);
-            atmosphere.transform.position = new Vector3(0f, 0.72f, 0f);
-            atmosphere.transform.localScale = new Vector3(10.6f, 0.018f, 10.6f);
-            atmosphere.GetComponent<Renderer>().material = Mat(new Color(1f, 0.28f, 0.06f, 0.18f), true);
-
             var rim = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             rim.name = "Dark Basalt Rim";
             rim.transform.SetParent(root.transform);
@@ -271,12 +264,22 @@ namespace StarAge3D
 
         void AddSlotBeacon(Transform parent)
         {
-            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            ring.name = "Slot Hologram Ring";
-            ring.transform.SetParent(parent);
-            ring.transform.localPosition = new Vector3(0f, 0.68f, 0f);
-            ring.transform.localScale = new Vector3(1.24f, 0.035f, 1.24f);
-            ring.GetComponent<Renderer>().material = Mat(new Color(0.15f, 0.85f, 1f, 0.36f), true);
+            Color ringColor = new Color(0.18f, 0.95f, 1f, 0.8f);
+            for (int i = 0; i < 20; i += 2)
+            {
+                float startAngle = i / 20f * Mathf.PI * 2f;
+                float endAngle = (i + 1f) / 20f * Mathf.PI * 2f;
+                Vector3 start = new Vector3(Mathf.Cos(startAngle) * 0.92f, 0.7f, Mathf.Sin(startAngle) * 0.92f);
+                Vector3 end = new Vector3(Mathf.Cos(endAngle) * 0.92f, 0.7f, Mathf.Sin(endAngle) * 0.92f);
+                var segment = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                segment.name = "Slot Hologram Segment";
+                segment.transform.SetParent(parent);
+                segment.transform.localPosition = (start + end) * 0.5f;
+                Vector3 delta = end - start;
+                segment.transform.localRotation = Quaternion.LookRotation(delta.normalized, Vector3.up);
+                segment.transform.localScale = new Vector3(0.035f, 0.025f, delta.magnitude);
+                segment.GetComponent<Renderer>().material = Mat(ringColor, true);
+            }
 
             for (int i = 0; i < 4; i++)
             {

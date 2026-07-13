@@ -616,10 +616,10 @@ namespace StarAge3D
 
         void AddPanelChrome(Transform parent, Vector2 size)
         {
-            AddUiLine(parent, "Top Neon Edge", new Vector2(0f, size.y * 0.5f - 2f), new Vector2(size.x - 8f, 2f), new Color(0.18f, 0.82f, 1f, 0.72f));
-            AddUiLine(parent, "Bottom Shadow Edge", new Vector2(0f, -size.y * 0.5f + 2f), new Vector2(size.x - 8f, 2f), new Color(0.04f, 0.11f, 0.22f, 0.92f));
-            AddUiLine(parent, "Left Neon Edge", new Vector2(-size.x * 0.5f + 2f, 0f), new Vector2(2f, size.y - 8f), new Color(0.08f, 0.45f, 0.8f, 0.64f));
-            AddUiLine(parent, "Right Neon Edge", new Vector2(size.x * 0.5f - 2f, 0f), new Vector2(2f, size.y - 8f), new Color(0.06f, 0.24f, 0.44f, 0.76f));
+            AddUiLine(parent, "Top Neon Edge", new Vector2(0f, size.y * 0.5f - 2f), new Vector2(size.x - 14f, 1.4f), new Color(0.18f, 0.82f, 1f, 0.42f));
+            AddUiLine(parent, "Bottom Shadow Edge", new Vector2(0f, -size.y * 0.5f + 2f), new Vector2(size.x - 14f, 1.2f), new Color(0.04f, 0.11f, 0.22f, 0.62f));
+            AddUiLine(parent, "Left Neon Edge", new Vector2(-size.x * 0.5f + 2f, size.y * 0.5f - 22f), new Vector2(1.4f, 34f), new Color(0.08f, 0.45f, 0.8f, 0.46f));
+            AddUiLine(parent, "Right Neon Edge", new Vector2(size.x * 0.5f - 2f, size.y * 0.5f - 22f), new Vector2(1.4f, 34f), new Color(0.06f, 0.24f, 0.44f, 0.48f));
         }
 
         void AddUiLine(Transform parent, string name, Vector2 position, Vector2 size, Color color)
@@ -697,8 +697,8 @@ namespace StarAge3D
 
         void AddButtonAccent(Transform parent, Vector2 size)
         {
-            AddUiLine(parent, "Button Scanline", new Vector2(0f, size.y * 0.5f - 3f), new Vector2(size.x - 10f, 2f), new Color(0.25f, 0.95f, 1f, 0.62f));
-            AddUiLine(parent, "Button Hot Corner L", new Vector2(-size.x * 0.5f + 7f, 0f), new Vector2(3f, size.y - 10f), new Color(0.2f, 0.95f, 1f, 0.36f));
+            AddUiLine(parent, "Button Scanline", new Vector2(0f, size.y * 0.5f - 3f), new Vector2(size.x - 14f, 1.3f), new Color(0.25f, 0.95f, 1f, 0.36f));
+            AddUiLine(parent, "Button Hot Corner L", new Vector2(-size.x * 0.5f + 7f, size.y * 0.5f - 11f), new Vector2(2f, 12f), new Color(0.2f, 0.95f, 1f, 0.28f));
         }
 
         void MakeStatBar(Transform parent, string name, Vector2 position, Color color, out RectTransform fillRect, out Text labelText)
