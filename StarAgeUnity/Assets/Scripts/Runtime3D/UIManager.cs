@@ -603,14 +603,38 @@ namespace StarAge3D
             var panel = new GameObject(name, typeof(Image));
             panel.transform.SetParent(canvas.transform, false);
             Image image = panel.GetComponent<Image>();
-            image.color = new Color(0.012f, 0.028f, 0.055f, 0.84f);
+            image.color = new Color(0.006f, 0.018f, 0.04f, 0.88f);
             RectTransform rect = panel.GetComponent<RectTransform>();
             rect.anchorMin = anchor;
             rect.anchorMax = anchor;
             rect.pivot = pivot;
             rect.anchoredPosition = position;
             rect.sizeDelta = size;
+            AddPanelChrome(panel.transform, size);
             return panel;
+        }
+
+        void AddPanelChrome(Transform parent, Vector2 size)
+        {
+            AddUiLine(parent, "Top Neon Edge", new Vector2(0f, size.y * 0.5f - 2f), new Vector2(size.x - 8f, 2f), new Color(0.18f, 0.82f, 1f, 0.72f));
+            AddUiLine(parent, "Bottom Shadow Edge", new Vector2(0f, -size.y * 0.5f + 2f), new Vector2(size.x - 8f, 2f), new Color(0.04f, 0.11f, 0.22f, 0.92f));
+            AddUiLine(parent, "Left Neon Edge", new Vector2(-size.x * 0.5f + 2f, 0f), new Vector2(2f, size.y - 8f), new Color(0.08f, 0.45f, 0.8f, 0.64f));
+            AddUiLine(parent, "Right Neon Edge", new Vector2(size.x * 0.5f - 2f, 0f), new Vector2(2f, size.y - 8f), new Color(0.06f, 0.24f, 0.44f, 0.76f));
+        }
+
+        void AddUiLine(Transform parent, string name, Vector2 position, Vector2 size, Color color)
+        {
+            var line = new GameObject(name, typeof(Image));
+            line.transform.SetParent(parent, false);
+            Image image = line.GetComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            RectTransform rect = line.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
         }
 
         Text MakeText(string name, Transform parent, Vector2 position, Vector2 size, TextAnchor anchor, int fontSize)
@@ -648,12 +672,19 @@ namespace StarAge3D
             var buttonObject = new GameObject(label, typeof(Image), typeof(Button));
             buttonObject.transform.SetParent(parent, false);
             Image image = buttonObject.GetComponent<Image>();
-            image.color = new Color(0.08f, 0.24f, 0.44f, 0.96f);
+            image.color = new Color(0.035f, 0.18f, 0.34f, 0.98f);
             RectTransform rect = buttonObject.GetComponent<RectTransform>();
             rect.anchoredPosition = position;
             rect.sizeDelta = size;
             Button button = buttonObject.GetComponent<Button>();
             button.onClick.AddListener(action);
+            ColorBlock colors = button.colors;
+            colors.normalColor = new Color(0.035f, 0.18f, 0.34f, 0.98f);
+            colors.highlightedColor = new Color(0.08f, 0.42f, 0.72f, 1f);
+            colors.pressedColor = new Color(0.03f, 0.7f, 0.92f, 1f);
+            colors.disabledColor = new Color(0.08f, 0.09f, 0.13f, 0.82f);
+            button.colors = colors;
+            AddButtonAccent(buttonObject.transform, size);
 
             Text labelText = MakeText("Label", buttonObject.transform, Vector2.zero, size, TextAnchor.MiddleCenter, 14);
             labelText.text = label;
@@ -662,6 +693,12 @@ namespace StarAge3D
             labelText.rectTransform.offsetMin = Vector2.zero;
             labelText.rectTransform.offsetMax = Vector2.zero;
             return buttonObject;
+        }
+
+        void AddButtonAccent(Transform parent, Vector2 size)
+        {
+            AddUiLine(parent, "Button Scanline", new Vector2(0f, size.y * 0.5f - 3f), new Vector2(size.x - 10f, 2f), new Color(0.25f, 0.95f, 1f, 0.62f));
+            AddUiLine(parent, "Button Hot Corner L", new Vector2(-size.x * 0.5f + 7f, 0f), new Vector2(3f, size.y - 10f), new Color(0.2f, 0.95f, 1f, 0.36f));
         }
 
         void MakeStatBar(Transform parent, string name, Vector2 position, Color color, out RectTransform fillRect, out Text labelText)
@@ -693,14 +730,25 @@ namespace StarAge3D
             labelText.rectTransform.anchorMax = Vector2.one;
             labelText.rectTransform.offsetMin = Vector2.zero;
             labelText.rectTransform.offsetMax = Vector2.zero;
+            AddUiLine(bar.transform, "Bar Spark", new Vector2(0f, 8f), new Vector2(216f, 1.5f), new Color(color.r, color.g, color.b, 0.58f));
         }
 
         void Clear(Transform parent)
         {
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                Destroy(parent.GetChild(i).gameObject);
+                Transform child = parent.GetChild(i);
+                if (IsPanelChrome(child.name)) continue;
+                Destroy(child.gameObject);
             }
+        }
+
+        bool IsPanelChrome(string objectName)
+        {
+            return objectName == "Top Neon Edge"
+                || objectName == "Bottom Shadow Edge"
+                || objectName == "Left Neon Edge"
+                || objectName == "Right Neon Edge";
         }
     }
 }

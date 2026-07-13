@@ -74,13 +74,26 @@ namespace StarAge3D
 
         public void SpawnProjectile(ShipController owner, Vector3 origin, Vector3 direction, int damage, Color color)
         {
-            var bolt = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var bolt = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             bolt.name = owner.IsEnemy ? "Pirate Laser" : "Player Laser";
             bolt.transform.position = origin;
-            bolt.transform.localScale = Vector3.one * 0.18f;
+            bolt.transform.rotation = Quaternion.LookRotation(direction, Vector3.up) * Quaternion.Euler(90f, 0f, 0f);
+            bolt.transform.localScale = new Vector3(0.13f, 0.48f, 0.13f);
             bolt.GetComponent<Renderer>().material = Mat(color);
+            var light = bolt.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = color;
+            light.range = 4.5f;
+            light.intensity = 2.2f;
+            var trail = bolt.AddComponent<TrailRenderer>();
+            trail.time = 0.18f;
+            trail.startWidth = 0.22f;
+            trail.endWidth = 0.02f;
+            trail.material = RuntimeMaterial.Create(new Color(color.r, color.g, color.b, 0.62f), true);
             var collider = bolt.GetComponent<SphereCollider>();
-            collider.isTrigger = true;
+            if (collider != null) collider.isTrigger = true;
+            var capsule = bolt.GetComponent<CapsuleCollider>();
+            if (capsule != null) capsule.isTrigger = true;
             var rb = bolt.AddComponent<Rigidbody>();
             rb.useGravity = false;
             rb.isKinematic = true;
@@ -115,6 +128,7 @@ namespace StarAge3D
         {
             BuildNebulaBackdrop();
             BuildStarfield();
+            BuildWarpLanes();
             BuildSolarSystem();
             RebuildPlayerShip();
             SpawnMiningObjectAt(new Vector3(-6f, 0f, 33f), true, 2.1f);
@@ -150,6 +164,18 @@ namespace StarAge3D
                 cloud.transform.localScale = new Vector3(Random.Range(16f, 34f), 0.04f, Random.Range(12f, 28f));
                 cloud.GetComponent<Renderer>().material = RuntimeMaterial.Create(colors[Random.Range(0, colors.Length)], true);
             }
+
+            for (int i = 0; i < 18; i++)
+            {
+                var veil = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                veil.name = "Volumetric Nebula Veil";
+                veil.transform.SetParent(root.transform);
+                veil.transform.position = new Vector3(Random.Range(-135f, 135f), Random.Range(7f, 36f), Random.Range(-135f, 135f));
+                veil.transform.rotation = Quaternion.Euler(Random.Range(-8f, 8f), Random.Range(0f, 360f), Random.Range(-8f, 8f));
+                veil.transform.localScale = new Vector3(Random.Range(12f, 28f), 0.035f, Random.Range(3f, 9f));
+                Color tint = colors[Random.Range(0, colors.Length)];
+                veil.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(tint.r, tint.g, tint.b, 0.28f), true);
+            }
         }
 
         void BuildSolarSystem()
@@ -176,9 +202,39 @@ namespace StarAge3D
             light.intensity = 5f;
             light.range = 95f;
 
+            AddOrbitRing(118f, new Color(0.2f, 0.55f, 1f, 0.38f));
+            AddOrbitRing(142f, new Color(0.7f, 0.35f, 1f, 0.28f));
+            AddOrbitRing(168f, new Color(0.25f, 0.95f, 1f, 0.24f));
             AddSystemPlanet("Novara", new Vector3(-28f, 0f, 118f), 3.5f, new Color(0.85f, 0.32f, 0.12f), true);
             AddSystemPlanet("Veles", new Vector3(34f, 0f, 134f), 3.2f, new Color(0.45f, 0.85f, 0.44f), true);
             AddSystemPlanet("Kryos", new Vector3(64f, 0f, 164f), 2.7f, new Color(0.42f, 0.84f, 1f), false);
+        }
+
+        void BuildWarpLanes()
+        {
+            AddWarpLane(new Vector3(-72f, 1f, -42f), new Vector3(92f, 1.5f, 58f), new Color(0.1f, 0.72f, 1f, 0.42f));
+            AddWarpLane(new Vector3(-88f, 2f, 72f), new Vector3(76f, 1f, -62f), new Color(0.72f, 0.3f, 1f, 0.28f));
+            AddWarpLane(new Vector3(-36f, 0.6f, 104f), new Vector3(64f, 0.8f, 148f), new Color(0.35f, 1f, 0.72f, 0.34f));
+        }
+
+        void AddWarpLane(Vector3 a, Vector3 b, Color color)
+        {
+            var lane = new GameObject("Luminous Warp Lane");
+            lane.transform.SetParent(root.transform);
+            var line = lane.AddComponent<LineRenderer>();
+            line.positionCount = 18;
+            line.useWorldSpace = true;
+            line.widthMultiplier = 0.18f;
+            line.material = RuntimeMaterial.Create(color, true);
+            Vector3 side = Vector3.Cross((b - a).normalized, Vector3.up).normalized;
+            for (int i = 0; i < line.positionCount; i++)
+            {
+                float t = i / (float)(line.positionCount - 1);
+                Vector3 p = Vector3.Lerp(a, b, t);
+                p += side * Mathf.Sin(t * Mathf.PI * 4f) * 1.2f;
+                p.y += Mathf.Sin(t * Mathf.PI) * 3.5f;
+                line.SetPosition(i, p);
+            }
         }
 
         void AddOrbitRing(float radius, Color color)
@@ -218,7 +274,20 @@ namespace StarAge3D
                 glow.GetComponent<Renderer>().material = RuntimeMaterial.Create(color * 1.25f, true);
             }
 
+            AddPlanetRing(label, position, radius, color);
+
             AddSpaceLabel(planet.transform, label, new Color(0.7f, 0.9f, 1f), radius * 0.9f + 2f);
+        }
+
+        void AddPlanetRing(string label, Vector3 position, float radius, Color color)
+        {
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ring.name = label + " Orbital Disc";
+            ring.transform.SetParent(root.transform);
+            ring.transform.position = position;
+            ring.transform.rotation = Quaternion.Euler(8f, 0f, 18f);
+            ring.transform.localScale = new Vector3(radius * 1.55f, 0.012f, radius * 1.55f);
+            ring.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(color.r, color.g, color.b, 0.18f), true);
         }
 
         void BuildStarfield()
@@ -355,8 +424,10 @@ namespace StarAge3D
             for (int side = -1; side <= 1; side += 2)
             {
                 AddBox(rootShip.transform, "Swept Main Wing", new Vector3(side * 0.82f, -0.05f, -0.25f), new Vector3(1.25f, 0.08f, 0.48f), hull * 0.86f, Quaternion.Euler(0f, side * -18f, side * 7f));
+                AddBox(rootShip.transform, "Forward Canard Wing", new Vector3(side * 0.58f, -0.03f, 0.82f), new Vector3(0.68f, 0.055f, 0.26f), hull * 0.92f, Quaternion.Euler(0f, side * -28f, side * 5f));
                 AddBox(rootShip.transform, "Outer Wing Blade", new Vector3(side * 1.42f, -0.07f, -0.42f), new Vector3(0.9f, 0.055f, 0.22f), darkHull, Quaternion.Euler(0f, side * -24f, side * 4f));
                 AddBox(rootShip.transform, "Wing Glow Strip", new Vector3(side * 1.18f, 0.005f, -0.23f), new Vector3(0.72f, 0.018f, 0.045f), trim, Quaternion.Euler(0f, side * -18f, 0f), true);
+                AddBox(rootShip.transform, "Canard Glow Strip", new Vector3(side * 0.58f, 0.015f, 0.86f), new Vector3(0.42f, 0.014f, 0.035f), trim, Quaternion.Euler(0f, side * -28f, 0f), true);
 
                 AddBox(rootShip.transform, "Side Armor Intake", new Vector3(side * 0.56f, 0.02f, -0.9f), new Vector3(0.28f, 0.22f, 0.58f), darkHull, Quaternion.identity);
                 AddBox(rootShip.transform, "Rear Engine Block", new Vector3(side * 0.42f, -0.04f, -1.34f), new Vector3(0.34f, 0.28f, 0.44f), darkHull, Quaternion.identity);
@@ -368,6 +439,7 @@ namespace StarAge3D
                 engine.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                 engine.transform.localScale = new Vector3(0.2f, 0.18f, 0.2f);
                 engine.GetComponent<Renderer>().material = RuntimeMaterial.Create(trim, true);
+                AddEngineFlame(rootShip.transform, side, trim);
 
                 AddBox(rootShip.transform, "Vertical Tail Fin", new Vector3(side * 0.44f, 0.36f, -1.06f), new Vector3(0.14f, 0.62f, 0.34f), hull * 0.72f, Quaternion.Euler(0f, 0f, side * -8f));
                 AddBox(rootShip.transform, "Laser Cannon", new Vector3(side * 0.42f, -0.12f, 1.35f), new Vector3(0.07f, 0.07f, 0.74f), new Color(0.02f, 0.025f, 0.03f), Quaternion.identity);
@@ -378,11 +450,40 @@ namespace StarAge3D
             AddBox(rootShip.transform, "Port Hull Panel", new Vector3(-0.22f, 0.17f, -0.1f), new Vector3(0.2f, 0.025f, 0.86f), darkHull, Quaternion.Euler(0f, -6f, 0f));
             AddBox(rootShip.transform, "Starboard Hull Panel", new Vector3(0.22f, 0.17f, -0.1f), new Vector3(0.2f, 0.025f, 0.86f), darkHull, Quaternion.Euler(0f, 6f, 0f));
             AddBox(rootShip.transform, "Rear Reactor Glow", new Vector3(0f, 0.03f, -1.72f), new Vector3(0.22f, 0.18f, 0.08f), trim, Quaternion.identity, true);
+            AddBox(rootShip.transform, "Ventral Sensor Blade", new Vector3(0f, -0.38f, 0.12f), new Vector3(0.08f, 0.5f, 0.42f), darkHull, Quaternion.Euler(0f, 0f, 0f));
+            AddShipShieldOutline(rootShip.transform, trim);
 
             var collider = rootShip.AddComponent<SphereCollider>();
             collider.radius = 1.05f;
             collider.isTrigger = true;
             return rootShip;
+        }
+
+        void AddEngineFlame(Transform parent, int side, Color trim)
+        {
+            var flame = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            flame.name = "Engine Plasma Flame";
+            flame.transform.SetParent(parent);
+            flame.transform.localPosition = new Vector3(side * 0.42f, -0.04f, -1.98f);
+            flame.transform.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+            flame.transform.localScale = new Vector3(0.24f, 0.72f, 0.24f);
+            flame.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(trim.r, trim.g, trim.b, 0.68f), true);
+            var light = flame.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.range = 3.8f;
+            light.intensity = 1.4f;
+            light.color = trim;
+        }
+
+        void AddShipShieldOutline(Transform parent, Color trim)
+        {
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            ring.name = "Subtle Shield Ring";
+            ring.transform.SetParent(parent);
+            ring.transform.localPosition = new Vector3(0f, 0.02f, -0.12f);
+            ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            ring.transform.localScale = new Vector3(1.75f, 1.75f, 0.035f);
+            ring.GetComponent<Renderer>().material = RuntimeMaterial.Create(new Color(trim.r, trim.g, trim.b, 0.16f), true);
         }
 
         void AddNameplate(Transform parent, string label, ShipController controller, Color color)

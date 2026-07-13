@@ -88,6 +88,13 @@ namespace StarAge3D
             surface.transform.localScale = new Vector3(9.8f, 0.42f, 9.8f);
             surface.GetComponent<Renderer>().material = Mat(new Color(0.46f, 0.22f, 0.14f));
 
+            var atmosphere = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            atmosphere.name = "Colony Heat Haze Atmosphere";
+            atmosphere.transform.SetParent(root.transform);
+            atmosphere.transform.position = new Vector3(0f, 0.72f, 0f);
+            atmosphere.transform.localScale = new Vector3(10.6f, 0.018f, 10.6f);
+            atmosphere.GetComponent<Renderer>().material = Mat(new Color(1f, 0.28f, 0.06f, 0.18f), true);
+
             var rim = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             rim.name = "Dark Basalt Rim";
             rim.transform.SetParent(root.transform);
@@ -202,6 +209,7 @@ namespace StarAge3D
                 baseObject.transform.position = new Vector3(x * 3.25f, 0.78f, z * 3.25f);
                 baseObject.transform.localScale = new Vector3(0.92f, 0.1f, 0.92f);
                 baseObject.GetComponent<Renderer>().material = Mat(new Color(0.08f, 0.38f, 0.52f), true);
+                AddSlotBeacon(baseObject.transform);
                 var slot = baseObject.AddComponent<BuildingSlot>();
                 slot.Init(i);
                 Slots.Add(slot);
@@ -239,6 +247,12 @@ namespace StarAge3D
             body.transform.localScale = new Vector3(0.82f, 0.85f, 0.82f);
             body.GetComponent<Renderer>().material = Mat(ColorFor(type));
 
+            var foundation = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            foundation.transform.SetParent(go.transform);
+            foundation.transform.localPosition = new Vector3(0f, -0.48f, 0f);
+            foundation.transform.localScale = new Vector3(0.96f, 0.08f, 0.96f);
+            foundation.GetComponent<Renderer>().material = Mat(new Color(0.05f, 0.09f, 0.11f));
+
             var cap = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             cap.transform.SetParent(go.transform);
             cap.transform.localPosition = Vector3.up * 0.92f;
@@ -250,7 +264,50 @@ namespace StarAge3D
             antenna.transform.localPosition = new Vector3(0.22f, 1.22f, 0.12f);
             antenna.transform.localScale = new Vector3(0.035f, 0.34f, 0.035f);
             antenna.GetComponent<Renderer>().material = Mat(new Color(0.72f, 0.78f, 0.82f));
+
+            AddBuildingGlow(go.transform, ColorFor(type));
             return go;
+        }
+
+        void AddSlotBeacon(Transform parent)
+        {
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ring.name = "Slot Hologram Ring";
+            ring.transform.SetParent(parent);
+            ring.transform.localPosition = new Vector3(0f, 0.68f, 0f);
+            ring.transform.localScale = new Vector3(1.24f, 0.035f, 1.24f);
+            ring.GetComponent<Renderer>().material = Mat(new Color(0.15f, 0.85f, 1f, 0.36f), true);
+
+            for (int i = 0; i < 4; i++)
+            {
+                var tick = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                tick.name = "Slot Hologram Tick";
+                tick.transform.SetParent(parent);
+                float angle = i * 90f;
+                Vector3 offset = Quaternion.Euler(0f, angle, 0f) * new Vector3(0f, 0.75f, 1.12f);
+                tick.transform.localPosition = offset;
+                tick.transform.localRotation = Quaternion.Euler(0f, angle, 0f);
+                tick.transform.localScale = new Vector3(0.08f, 0.04f, 0.32f);
+                tick.GetComponent<Renderer>().material = Mat(new Color(0.3f, 1f, 0.9f), true);
+            }
+        }
+
+        void AddBuildingGlow(Transform parent, Color color)
+        {
+            var strip = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            strip.name = "Building Status Light";
+            strip.transform.SetParent(parent);
+            strip.transform.localPosition = new Vector3(0f, 0.08f, 0.43f);
+            strip.transform.localScale = new Vector3(0.52f, 0.05f, 0.05f);
+            strip.GetComponent<Renderer>().material = Mat(new Color(color.r, color.g, color.b, 0.88f), true);
+
+            var light = new GameObject("Building Local Glow").AddComponent<Light>();
+            light.transform.SetParent(parent);
+            light.transform.localPosition = new Vector3(0f, 0.65f, 0.3f);
+            light.type = LightType.Point;
+            light.color = color;
+            light.intensity = 0.75f;
+            light.range = 2.4f;
         }
 
         Color ColorFor(BuildingType type)
