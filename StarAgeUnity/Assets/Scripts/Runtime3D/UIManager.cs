@@ -85,7 +85,7 @@ namespace StarAge3D
             marketPanel = MakePanel("Market", Vector2.zero, new Vector2(520f, 430f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             questPanel = MakePanel("Quest Board", Vector2.zero, new Vector2(700f, 520f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
             shipyardPanel = MakePanel("Shipyard", Vector2.zero, new Vector2(560f, 460f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
-            galaxyPanel = MakePanel("Galaxy Map", Vector2.zero, new Vector2(1040f, 620f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            galaxyPanel = MakePanel("Galaxy Map", Vector2.zero, new Vector2(1160f, 650f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
             HidePopups();
             Refresh();
@@ -362,15 +362,16 @@ namespace StarAge3D
             galaxyPanel.SetActive(open);
             if (!open) return;
             Clear(galaxyPanel.transform);
-            AddTitle(galaxyPanel, "Galaxy");
-            AddText(galaxyPanel, "Click a reachable system to travel. Locked systems show the level needed, matching the Starkus route graph.", new Vector2(-460f, 258f), new Vector2(880f, 42f));
+            AddGalaxyBackdrop();
+            AddTitle(galaxyPanel, "Galaxy Navigation");
+            AddText(galaxyPanel, "Route chart: travel lanes, unlock levels, faction zones, threat, and economy at a glance.", new Vector2(-520f, 266f), new Vector2(760f, 34f));
 
-            Vector2 fomen = new Vector2(0f, -122f);
-            Vector2 bellum = new Vector2(-212f, -18f);
-            Vector2 tais = new Vector2(226f, -22f);
-            Vector2 sparta = new Vector2(-108f, 126f);
-            Vector2 pioner = new Vector2(344f, 118f);
-            Vector2 orion = new Vector2(-384f, 84f);
+            Vector2 fomen = new Vector2(-42f, -122f);
+            Vector2 bellum = new Vector2(-270f, -8f);
+            Vector2 tais = new Vector2(236f, -42f);
+            Vector2 sparta = new Vector2(-108f, 122f);
+            Vector2 pioner = new Vector2(390f, 126f);
+            Vector2 orion = new Vector2(-438f, 94f);
 
             AddGalaxyConnection(fomen, bellum, true);
             AddGalaxyConnection(fomen, tais, false);
@@ -378,24 +379,58 @@ namespace StarAge3D
             AddGalaxyConnection(sparta, orion, false);
             AddGalaxyConnection(tais, pioner, false);
             AddGalaxyConnection(orion, pioner, false);
+            AddGalaxyRouteLabel("trade lane", fomen, bellum, true);
+            AddGalaxyRouteLabel("survey permit L2", fomen, tais, false);
+            AddGalaxyRouteLabel("war front L3", bellum, sparta, false);
+            AddGalaxyRouteLabel("deep gate L5", sparta, orion, false);
+            AddGalaxyRouteLabel("pioneer jump L4", tais, pioner, false);
 
             StarAgeSaveData data = GameManager.Instance.Save.Data;
-            AddGalaxySystem("Fomen", "home", fomen, new Color(0.35f, 1f, 0.55f), 1, data.currentSystem == "Fomen", true);
-            AddGalaxySystem("Bellum", "reachable", bellum, new Color(0.35f, 1f, 0.55f), 1, data.currentSystem == "Bellum", true);
-            AddGalaxySystem("Tais", "lock 2", tais, new Color(1f, 0.78f, 0.28f), 2, data.currentSystem == "Tais", false);
-            AddGalaxySystem("Sparta", "lock 3", sparta, new Color(1f, 0.55f, 0.25f), 3, data.currentSystem == "Sparta", false);
-            AddGalaxySystem("Pioner", "lock 4", pioner, new Color(1f, 0.24f, 0.22f), 4, data.currentSystem == "Pioner", false);
-            AddGalaxySystem("Orion", "lock 5", orion, new Color(1f, 0.2f, 0.18f), 5, data.currentSystem == "Orion", false);
+            AddGalaxySystem("Fomen", "home colony", "Military", "Safe", "Ore + ice", fomen, new Color(0.32f, 1f, 0.58f), 1, data.currentSystem == "Fomen", true);
+            AddGalaxySystem("Bellum", "open trade", "Trade", "Low", "Market + contracts", bellum, new Color(0.38f, 0.95f, 1f), 1, data.currentSystem == "Bellum", true);
+            AddGalaxySystem("Tais", "frontier lock", "Mining", "Medium", "Uranium belt", tais, new Color(1f, 0.78f, 0.28f), 2, data.currentSystem == "Tais", false);
+            AddGalaxySystem("Sparta", "pirate warzone", "Combat", "High", "Bounties", sparta, new Color(1f, 0.48f, 0.22f), 3, data.currentSystem == "Sparta", false);
+            AddGalaxySystem("Pioner", "colonist gate", "Expansion", "High", "Rare cargo", pioner, new Color(1f, 0.26f, 0.22f), 4, data.currentSystem == "Pioner", false);
+            AddGalaxySystem("Orion", "capital route", "Core", "Extreme", "Elite ships", orion, new Color(0.9f, 0.32f, 1f), 5, data.currentSystem == "Orion", false);
 
+            AddGalaxyInfoPanel(data);
             AddGalaxyLegend();
-            MakeButton("Close", galaxyPanel.transform, new Vector2(0f, -268f), new Vector2(180f, 36f), HidePopups);
+            MakeButton("Close", galaxyPanel.transform, new Vector2(398f, -286f), new Vector2(180f, 36f), HidePopups);
         }
 
-        void AddGalaxySystem(string title, string subtitle, Vector2 position, Color color, int requiredLevel, bool current, bool reachable)
+        void AddGalaxyBackdrop()
+        {
+            AddGalaxyPanelBlock("Core Sector", new Vector2(-300f, 48f), new Vector2(450f, 360f), new Color(0.02f, 0.08f, 0.16f, 0.42f));
+            AddGalaxyPanelBlock("Frontier Sector", new Vector2(220f, 40f), new Vector2(430f, 350f), new Color(0.12f, 0.06f, 0.02f, 0.38f));
+            AddGalaxyPanelBlock("Outer Lock Zone", new Vector2(0f, 124f), new Vector2(1000f, 236f), new Color(0.08f, 0.02f, 0.08f, 0.22f));
+            AddGalaxyGridLine(new Vector2(-520f, -210f), new Vector2(520f, -210f), new Color(0.22f, 0.45f, 0.85f, 0.16f));
+            AddGalaxyGridLine(new Vector2(-520f, 210f), new Vector2(520f, 210f), new Color(0.22f, 0.45f, 0.85f, 0.16f));
+            AddGalaxyGridLine(new Vector2(-520f, -210f), new Vector2(-520f, 210f), new Color(0.22f, 0.45f, 0.85f, 0.16f));
+            AddGalaxyGridLine(new Vector2(520f, -210f), new Vector2(520f, 210f), new Color(0.22f, 0.45f, 0.85f, 0.16f));
+        }
+
+        void AddGalaxyPanelBlock(string label, Vector2 position, Vector2 size, Color color)
+        {
+            var block = new GameObject(label, typeof(Image));
+            block.transform.SetParent(galaxyPanel.transform, false);
+            Image image = block.GetComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            RectTransform rect = block.GetComponent<RectTransform>();
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            block.transform.SetAsFirstSibling();
+            Text text = MakeText(label + " Label", block.transform, new Vector2(12f, -10f), new Vector2(size.x - 24f, 24f), TextAnchor.UpperLeft, 12);
+            text.color = new Color(0.62f, 0.78f, 1f, 0.72f);
+            text.text = label.ToUpperInvariant();
+        }
+
+        void AddGalaxySystem(string title, string subtitle, string faction, string threat, string economy, Vector2 position, Color color, int requiredLevel, bool current, bool reachable)
         {
             bool unlocked = GameManager.Instance.Save.Data.level >= requiredLevel;
-            string markerText = current ? title + "\nHERE" : unlocked && reachable ? title + "\nGO" : title + "\n" + subtitle;
-            Vector2 markerSize = current ? new Vector2(92f, 70f) : new Vector2(78f, 62f);
+            string lockText = unlocked ? (reachable ? "JUMP READY" : "SCOUTED") : "LOCKED L" + requiredLevel;
+            string markerText = title + "\n" + lockText;
+            Vector2 markerSize = current ? new Vector2(116f, 82f) : new Vector2(106f, 74f);
             GameObject marker = MakeButton(markerText, galaxyPanel.transform, position, markerSize, () =>
             {
                 if (GameManager.Instance.TravelToSystem(title, requiredLevel)) HidePopups();
@@ -407,9 +442,13 @@ namespace StarAge3D
                 if (image != null) image.color = unlocked ? color : new Color(0.22f, 0.24f, 0.32f, 0.98f);
                 Button button = marker.GetComponent<Button>();
                 if (button != null) button.interactable = unlocked;
+                Text label = marker.GetComponentInChildren<Text>();
+                if (label != null) label.fontSize = current ? 14 : 12;
             }
 
-            AddGalaxyHalo(position, current ? 58f : 44f, current ? new Color(0.35f, 1f, 0.55f, 0.24f) : new Color(color.r, color.g, color.b, 0.12f));
+            AddGalaxyHalo(position, current ? 84f : 64f, current ? new Color(0.35f, 1f, 0.55f, 0.24f) : new Color(color.r, color.g, color.b, 0.12f));
+            AddGalaxyOrbit(position, current ? 94f : 74f, unlocked ? color : new Color(0.36f, 0.38f, 0.46f, 0.5f));
+            AddText(galaxyPanel, $"{subtitle}\n{faction} | Threat: {threat}\n{economy}", position + new Vector2(-58f, -72f), new Vector2(150f, 58f));
         }
 
         void AddGalaxyConnection(Vector2 a, Vector2 b, bool reachable)
@@ -431,7 +470,9 @@ namespace StarAge3D
         {
             var line = new GameObject("Galaxy Route", typeof(Image));
             line.transform.SetParent(galaxyPanel.transform, false);
-            line.GetComponent<Image>().color = reachable ? new Color(0.35f, 1f, 0.55f, 0.72f) : new Color(0.2f, 0.48f, 0.95f, 0.32f);
+            Image image = line.GetComponent<Image>();
+            image.color = reachable ? new Color(0.35f, 1f, 0.55f, 0.72f) : new Color(0.2f, 0.48f, 0.95f, 0.32f);
+            image.raycastTarget = false;
             RectTransform rect = line.GetComponent<RectTransform>();
             Vector2 delta = b - a;
             rect.anchoredPosition = a + delta * 0.5f;
@@ -439,20 +480,64 @@ namespace StarAge3D
             rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
         }
 
+        void AddGalaxyGridLine(Vector2 a, Vector2 b, Color color)
+        {
+            var line = new GameObject("Galaxy Grid", typeof(Image));
+            line.transform.SetParent(galaxyPanel.transform, false);
+            Image image = line.GetComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            RectTransform rect = line.GetComponent<RectTransform>();
+            Vector2 delta = b - a;
+            rect.anchoredPosition = a + delta * 0.5f;
+            rect.sizeDelta = new Vector2(delta.magnitude, 2f);
+            rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+        }
+
+        void AddGalaxyRouteLabel(string label, Vector2 a, Vector2 b, bool reachable)
+        {
+            Vector2 position = (a + b) * 0.5f + new Vector2(0f, 18f);
+            Text text = MakeText("Route Label", galaxyPanel.transform, position, new Vector2(160f, 22f), TextAnchor.UpperLeft, 11);
+            text.color = reachable ? new Color(0.42f, 1f, 0.64f, 0.92f) : new Color(0.58f, 0.72f, 1f, 0.56f);
+            text.text = label.ToUpperInvariant();
+        }
+
         void AddGalaxyHalo(Vector2 position, float size, Color color)
         {
             var halo = new GameObject("Galaxy Halo", typeof(Image));
             halo.transform.SetParent(galaxyPanel.transform, false);
-            halo.GetComponent<Image>().color = color;
+            Image image = halo.GetComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
             RectTransform rect = halo.GetComponent<RectTransform>();
             rect.anchoredPosition = position;
             rect.sizeDelta = new Vector2(size, size);
-            halo.transform.SetAsFirstSibling();
+        }
+
+        void AddGalaxyOrbit(Vector2 position, float size, Color color)
+        {
+            for (int i = 0; i < 28; i += 2)
+            {
+                float a = i / 28f * Mathf.PI * 2f;
+                float b = (i + 1f) / 28f * Mathf.PI * 2f;
+                Vector2 start = position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * size * 0.5f;
+                Vector2 end = position + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * size * 0.5f;
+                AddGalaxyGridLine(start, end, new Color(color.r, color.g, color.b, 0.34f));
+            }
+        }
+
+        void AddGalaxyInfoPanel(StarAgeSaveData data)
+        {
+            AddGalaxyPanelBlock("Navigation Intel", new Vector2(402f, -108f), new Vector2(270f, 246f), new Color(0.018f, 0.04f, 0.085f, 0.78f));
+            AddText(galaxyPanel,
+                $"CURRENT: {data.currentSystem}\nLEVEL: {data.level}   XP: {data.xp}\n\nNEXT UNLOCKS\nL2 Tais: uranium belt\nL3 Sparta: pirate warzone\nL4 Pioner: expansion gate\nL5 Orion: capital route\n\nAVAILABLE NOW\nFomen <-> Bellum",
+                new Vector2(282f, -24f),
+                new Vector2(245f, 192f));
         }
 
         void AddGalaxyLegend()
         {
-            AddText(galaxyPanel, "Green route: available now\nYellow/red nodes: locked by level\nCurrent system is saved and shown in the HUD.", new Vector2(-460f, -242f), new Vector2(460f, 72f));
+            AddText(galaxyPanel, "Legend: bright lane = available jump | blue dashed = locked route | rings = system orbit | dark card = locked node.", new Vector2(-520f, -286f), new Vector2(660f, 34f));
         }
 
         void TryRepairShip()
