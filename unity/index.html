@@ -6,7 +6,7 @@
     <title>Unity Web Player | Hermit Crab Survival</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-  <script id="hermit-crab-f5-camera">window.addEventListener('keydown',function(e){var k=e.key&&e.key.toLowerCase();if(e.key==='F5'||e.keyCode===116||k==='z'||k==='x'){var c=document.querySelector('#unity-canvas');if(document.pointerLockElement===c||document.activeElement===c){e.preventDefault();e.stopPropagation();}}},true);</script><style id="hermit-crab-responsive-frame">html,body{width:100%;height:100%;overflow:hidden;background:#1f1f20}#unity-container.unity-desktop{width:min(960px,100vw,calc(160vh - 60.8px))}#unity-container.unity-desktop #unity-canvas{display:block;width:100%!important;height:auto!important;aspect-ratio:8/5}#unity-container.unity-desktop #unity-footer{width:100%}</style></head>
+  <script id="hermit-crab-f5-camera">window.addEventListener('keydown',function(e){var k=e.key&&e.key.toLowerCase();if(e.key==='F5'||e.keyCode===116||k==='z'||k==='x'){var c=document.querySelector('#unity-canvas');if(document.pointerLockElement===c||document.activeElement===c){e.preventDefault();}}},true);</script><style id="hermit-crab-responsive-frame">html,body{width:100%;height:100%;overflow:hidden;background:#1f1f20}#unity-container.unity-desktop{width:min(960px,100vw,calc(160vh - 60.8px))}#unity-container.unity-desktop #unity-canvas{display:block;width:100%!important;height:auto!important;aspect-ratio:8/5}#unity-container.unity-desktop #unity-footer{width:100%}</style></head>
   <body>
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
@@ -52,12 +52,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/unity.loader.js?v=20260715142700";
+      var loaderUrl = buildUrl + "/unity.loader.js?v=20260715143100";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/unity.data?v=20260715142700",
-        frameworkUrl: buildUrl + "/unity.framework.js?v=20260715142700",
-        codeUrl: buildUrl + "/unity.wasm?v=20260715142700",
+        dataUrl: buildUrl + "/unity.data?v=20260715143100",
+        frameworkUrl: buildUrl + "/unity.framework.js?v=20260715143100",
+        codeUrl: buildUrl + "/unity.wasm?v=20260715143100",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Vlad Coder Design",
         productName: "Hermit Crab Survival",
